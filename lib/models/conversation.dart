@@ -1,6 +1,5 @@
 import 'friend.dart';
-
-enum MessageDeliveryStatus { sent, delivered, seen }
+import 'message_status.dart';
 
 /// One row in the Chat List: a friend paired with their latest message.
 /// Story 10 has no real message backend to read from yet (that's Story 12),
@@ -20,6 +19,6 @@ class Conversation {
   final String lastMessage;
   final DateTime lastMessageAt;
   final bool lastMessageFromMe;
-  final MessageDeliveryStatus status;
+  final MessageStatus status;
   final int unreadCount;
 }

@@ -10,6 +10,7 @@ import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/conversation.dart';
+import '../../../models/message_status.dart';
 import '../../../providers/chat_provider.dart';
 import '../../../routes/route_names.dart';
 
@@ -185,19 +186,19 @@ class _ConversationCard extends StatelessWidget {
     );
   }
 
-  IconData _statusIcon(MessageDeliveryStatus status) {
+  IconData _statusIcon(MessageStatus status) {
     switch (status) {
-      case MessageDeliveryStatus.sent:
+      case MessageStatus.sent:
         return Icons.check;
-      case MessageDeliveryStatus.delivered:
+      case MessageStatus.delivered:
         return Icons.done_all;
-      case MessageDeliveryStatus.seen:
+      case MessageStatus.seen:
         return Icons.done_all;
     }
   }
 
-  Color _statusColor(MessageDeliveryStatus status, ColorScheme colorScheme) {
-    return status == MessageDeliveryStatus.seen ? colorScheme.primary : colorScheme.onSurfaceVariant;
+  Color _statusColor(MessageStatus status, ColorScheme colorScheme) {
+    return status == MessageStatus.seen ? colorScheme.primary : colorScheme.onSurfaceVariant;
   }
 
   String _formatTimestamp(DateTime time) {

@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/widgets/app_bar.dart';
-import '../core/widgets/empty_state_widget.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/reset_password_screen.dart';
@@ -11,6 +8,7 @@ import '../features/auth/screens/signup_screen.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/verify_otp_screen.dart';
 import '../features/chat/screens/chat_list_screen.dart';
+import '../features/chat/screens/chat_screen.dart';
 import '../features/friends/screens/friend_requests_screen.dart';
 import '../features/friends/screens/friends_list_screen.dart';
 import '../features/friends/screens/search_friends_screen.dart';
@@ -109,26 +107,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RouteNames.chat,
-        builder: (context, state) => _ComingSoonScreen(title: (state.extra as Friend?)?.name ?? 'Chat'),
+        builder: (context, state) => ChatScreen(friend: state.extra as Friend),
       ),
     ],
   );
 });
-
-/// Stand-in destination for Story 11 (Chat Screen) until it's built.
-class _ComingSoonScreen extends StatelessWidget {
-  const _ComingSoonScreen({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(title: title),
-      body: EmptyStateWidget(
-        message: '$title is coming soon.',
-        icon: Icons.construction_outlined,
-      ),
-    );
-  }
-}

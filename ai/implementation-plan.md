@@ -51,11 +51,11 @@ story (see `../backend/ai/implementation-plan.md`) is already implemented.
 - [x] 8 — Friend Requests
 - [x] 9 — Friends List
 - [x] 10 — Chat List
-- [ ] 11 — Chat Screen
-- [ ] 12 — Message API Integration
-- [ ] 13 — Edit Message
-- [ ] 14 — Delete Message
-- [ ] 15 — Online Status
+- [x] 11 — Chat Screen
+- [x] 12 — Message API Integration
+- [x] 13 — Edit Message
+- [x] 14 — Delete Message
+- [x] 15 — Online Status
 - [ ] 16 — Refresh Mechanism
 - [ ] 17 — Loading, Empty & Error States
 - [ ] 18 — Responsive Design

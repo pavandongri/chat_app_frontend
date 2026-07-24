@@ -1,4 +1,5 @@
 import '../models/conversation.dart';
+import '../models/message_status.dart';
 import 'friends_repository.dart';
 
 /// Mock/local for now — no backend conversations-list endpoint exists, and
@@ -38,7 +39,7 @@ class ChatRepository {
         lastMessage: _sampleMessages[seed % _sampleMessages.length],
         lastMessageAt: now.subtract(Duration(minutes: (seed % 2880) + 1)),
         lastMessageFromMe: fromMe,
-        status: MessageDeliveryStatus.values[seed % MessageDeliveryStatus.values.length],
+        status: MessageStatus.values[seed % MessageStatus.values.length],
         unreadCount: fromMe ? 0 : seed % 4,
       ));
     }

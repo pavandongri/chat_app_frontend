@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/presence_indicator.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/friend.dart';
 import '../../../providers/friends_list_provider.dart';
@@ -106,8 +106,6 @@ class _FriendCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
@@ -119,15 +117,7 @@ class _FriendCard extends StatelessWidget {
                 Positioned(
                   right: 0,
                   bottom: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: friend.isOnline ? AppColors.onlineIndicator : AppColors.offlineIndicator,
-                      border: Border.all(color: colorScheme.surface, width: 2),
-                    ),
-                  ),
+                  child: PresenceDot(isOnline: friend.isOnline),
                 ),
               ],
             ),
@@ -142,12 +132,7 @@ class _FriendCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
-                    friend.isOnline ? 'Online' : 'Offline',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: friend.isOnline ? AppColors.onlineIndicator : colorScheme.onSurfaceVariant,
-                        ),
-                  ),
+                  PresenceStatusText(isOnline: friend.isOnline, lastSeen: friend.lastSeen),
                 ],
               ),
             ),
