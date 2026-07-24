@@ -35,7 +35,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.user.name ?? '');
-    _avatarUrlController = TextEditingController(text: widget.user.avatarUrl ?? '');
+    _avatarUrlController = TextEditingController(
+      text: widget.user.avatarUrl ?? '',
+    );
     _gender = widget.user.gender;
   }
 
@@ -52,7 +54,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     setState(() => _isSaving = true);
     try {
       final avatarUrl = _avatarUrlController.text.trim();
-      await ref.read(profileControllerProvider.notifier).updateProfile(
+      await ref
+          .read(profileControllerProvider.notifier)
+          .updateProfile(
             name: _nameController.text.trim(),
             gender: _gender,
             avatarUrl: avatarUrl.isEmpty ? null : avatarUrl,
@@ -90,7 +94,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           name: _nameController.text.trim().isEmpty
                               ? widget.user.username
                               : _nameController.text.trim(),
-                          avatarUrl: value.text.trim().isEmpty ? null : value.text.trim(),
+                          avatarUrl: value.text.trim().isEmpty
+                              ? null
+                              : value.text.trim(),
                           radius: 48,
                         ),
                       ),
@@ -106,7 +112,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       initialValue: _gender,
                       decoration: const InputDecoration(labelText: 'Gender'),
                       items: kGenderOptions
-                          .map((g) => DropdownMenuItem(value: g, child: Text(g[0].toUpperCase() + g.substring(1))))
+                          .map(
+                            (g) => DropdownMenuItem(
+                              value: g,
+                              child: Text(g[0].toUpperCase() + g.substring(1)),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) => setState(() => _gender = value),
                       validator: Validators.gender,
@@ -125,7 +136,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    AppButton(label: 'Save Changes', isLoading: _isSaving, onPressed: _submit),
+                    AppButton(
+                      label: 'Save Changes',
+                      isLoading: _isSaving,
+                      onPressed: _submit,
+                    ),
                   ],
                 ),
               ),

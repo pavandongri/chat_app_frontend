@@ -29,12 +29,18 @@ class Message {
       receiverId: json['receiverId'] as String,
       message: json['message'] as String,
       status: messageStatusFromJson(json['status'] as String),
-      editedAt: json['editedAt'] == null ? null : DateTime.parse(json['editedAt'] as String),
+      editedAt: json['editedAt'] == null
+          ? null
+          : DateTime.parse(json['editedAt'] as String),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
 
-  Message copyWith({String? message, MessageStatus? status, DateTime? editedAt}) {
+  Message copyWith({
+    String? message,
+    MessageStatus? status,
+    DateTime? editedAt,
+  }) {
     return Message(
       id: id,
       senderId: senderId,

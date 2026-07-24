@@ -49,7 +49,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
     try {
       final email = _emailController.text.trim();
-      await ref.read(authControllerProvider.notifier).signup(
+      await ref
+          .read(authControllerProvider.notifier)
+          .signup(
             username: _usernameController.text.trim(),
             name: _nameController.text.trim(),
             gender: _gender!,
@@ -58,7 +60,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           );
       if (!mounted) return;
       context.push(
-        Uri(path: RouteNames.verifyOtp, queryParameters: {'email': email}).toString(),
+        Uri(
+          path: RouteNames.verifyOtp,
+          queryParameters: {'email': email},
+        ).toString(),
       );
     } on AppException catch (e) {
       if (!mounted) return;
@@ -94,7 +99,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               initialValue: _gender,
               decoration: const InputDecoration(labelText: 'Gender'),
               items: kGenderOptions
-                  .map((g) => DropdownMenuItem(value: g, child: Text(g[0].toUpperCase() + g.substring(1))))
+                  .map(
+                    (g) => DropdownMenuItem(
+                      value: g,
+                      child: Text(g[0].toUpperCase() + g.substring(1)),
+                    ),
+                  )
                   .toList(),
               onChanged: (value) => setState(() => _gender = value),
               validator: Validators.gender,
@@ -114,9 +124,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               validator: Validators.password,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                 ),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -124,19 +137,26 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               controller: _confirmPasswordController,
               label: 'Confirm Password',
               obscureText: _obscureConfirmPassword,
-              validator: Validators.confirmPassword(() => _passwordController.text),
+              validator: Validators.confirmPassword(
+                () => _passwordController.text,
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscureConfirmPassword
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
                 ),
-                onPressed: () =>
-                    setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                onPressed: () => setState(
+                  () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            AppButton(label: 'Sign Up', isLoading: _isLoading, onPressed: _submit),
+            AppButton(
+              label: 'Sign Up',
+              isLoading: _isLoading,
+              onPressed: _submit,
+            ),
             const SizedBox(height: AppSpacing.lg),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

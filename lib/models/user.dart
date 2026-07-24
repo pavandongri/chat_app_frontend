@@ -36,22 +36,22 @@ class User {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'username': username,
-        'email': email,
-        'name': name,
-        'gender': gender,
-        'avatarUrl': avatarUrl,
-        'isEmailVerified': isEmailVerified,
-      };
+    'id': id,
+    'username': username,
+    'email': email,
+    'name': name,
+    'gender': gender,
+    'avatarUrl': avatarUrl,
+    'isEmailVerified': isEmailVerified,
+  };
 
   User copyWith({bool? isEmailVerified}) => User(
-        id: id,
-        username: username,
-        email: email,
-        name: name,
-        gender: gender,
-        avatarUrl: avatarUrl,
-        isEmailVerified: isEmailVerified ?? this.isEmailVerified,
-      );
+    id: id,
+    username: username,
+    email: email,
+    name: name,
+    gender: gender,
+    avatarUrl: avatarUrl,
+    isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+  );
 }

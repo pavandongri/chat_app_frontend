@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/app_exception.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
-import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/presence_indicator.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/friend.dart';
 import '../../../providers/friends_list_provider.dart';
@@ -31,6 +34,15 @@ class _FriendsListScreenState extends ConsumerState<FriendsListScreen> {
     super.dispose();
   }
 
+  Future<void> _refresh() async {
+    try {
+      await ref.read(friendsListControllerProvider.notifier).refresh();
+    } on AppException catch (e) {
+      if (!mounted) return;
+      AppSnackBar.showError(context, e.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final friendsAsync = ref.watch(friendsListControllerProvider);
@@ -38,61 +50,75 @@ class _FriendsListScreenState extends ConsumerState<FriendsListScreen> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Friends'),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
-              child: AppTextField(
-                controller: _searchController,
-                label: 'Search friends',
-                suffixIcon: const Icon(Icons.search),
-                onChanged: (value) => setState(() => _query = value),
-              ),
-            ),
-            Expanded(
-              child: friendsAsync.when(
-                loading: () => const LoadingWidget(message: 'Loading friends…'),
-                error: (error, _) => AppErrorWidget(
-                  message: error.toString(),
-                  onRetry: () => ref.invalidate(friendsListControllerProvider),
+        child: MaxWidthBox(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  0,
                 ),
-                data: (friends) {
-                  if (friends.isEmpty) {
-                    return const EmptyStateWidget(
-                      message: 'No friends yet — search for people to add.',
-                      icon: Icons.groups_outlined,
-                    );
-                  }
-
-                  final filtered = _query.trim().isEmpty
-                      ? friends
-                      : friends
-                          .where((f) => f.name.toLowerCase().contains(_query.trim().toLowerCase()))
-                          .toList();
-
-                  return RefreshIndicator(
-                    onRefresh: () => ref.refresh(friendsListControllerProvider.future),
-                    child: filtered.isEmpty
-                        ? ListView(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            children: const [
-                              EmptyStateWidget(
-                                message: 'No friends match your search.',
-                                icon: Icons.search_off_rounded,
-                              ),
-                            ],
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            itemCount: filtered.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
-                            itemBuilder: (context, index) => _FriendCard(friend: filtered[index]),
-                          ),
-                  );
-                },
+                child: AppTextField(
+                  controller: _searchController,
+                  label: 'Search friends',
+                  suffixIcon: const Icon(Icons.search),
+                  onChanged: (value) => setState(() => _query = value),
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: friendsAsync.when(
+                  loading: () => const SkeletonList(),
+                  error: (error, _) => AppErrorWidget(
+                    message: error.toString(),
+                    onRetry: () =>
+                        ref.invalidate(friendsListControllerProvider),
+                  ),
+                  data: (friends) {
+                    if (friends.isEmpty) {
+                      return const EmptyStateWidget(
+                        message: 'No friends yet — search for people to add.',
+                        icon: Icons.groups_outlined,
+                      );
+                    }
+
+                    final filtered = _query.trim().isEmpty
+                        ? friends
+                        : friends
+                              .where(
+                                (f) => f.name.toLowerCase().contains(
+                                  _query.trim().toLowerCase(),
+                                ),
+                              )
+                              .toList();
+
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: filtered.isEmpty
+                          ? ListView(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              children: const [
+                                EmptyStateWidget(
+                                  message: 'No friends match your search.',
+                                  icon: Icons.search_off_rounded,
+                                ),
+                              ],
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              itemCount: filtered.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: AppSpacing.sm),
+                              itemBuilder: (context, index) =>
+                                  _FriendCard(friend: filtered[index]),
+                            ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -108,12 +134,19 @@ class _FriendCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: Row(
           children: [
             Stack(
               children: [
-                UserAvatar(name: friend.name, avatarUrl: friend.avatarUrl, radius: 24),
+                UserAvatar(
+                  name: friend.name,
+                  avatarUrl: friend.avatarUrl,
+                  radius: 24,
+                ),
                 Positioned(
                   right: 0,
                   bottom: 0,
@@ -132,7 +165,10 @@ class _FriendCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  PresenceStatusText(isOnline: friend.isOnline, lastSeen: friend.lastSeen),
+                  PresenceStatusText(
+                    isOnline: friend.isOnline,
+                    lastSeen: friend.lastSeen,
+                  ),
                 ],
               ),
             ),

@@ -17,7 +17,9 @@ class AppTheme {
 
   static ThemeData _build(ColorScheme colorScheme) {
     final textTheme = AppTypography.textTheme(colorScheme);
-    final buttonShape = RoundedRectangleBorder(borderRadius: AppRadius.mdRadius);
+    final buttonShape = RoundedRectangleBorder(
+      borderRadius: AppRadius.mdRadius,
+    );
     const buttonPadding = EdgeInsets.symmetric(
       horizontal: AppSpacing.lg,
       vertical: AppSpacing.md,
@@ -36,13 +38,22 @@ class AppTheme {
         centerTitle: false,
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(padding: buttonPadding, shape: buttonShape),
+        style: FilledButton.styleFrom(
+          padding: buttonPadding,
+          shape: buttonShape,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(padding: buttonPadding, shape: buttonShape),
+        style: ElevatedButton.styleFrom(
+          padding: buttonPadding,
+          shape: buttonShape,
+        ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(padding: buttonPadding, shape: buttonShape),
+        style: OutlinedButton.styleFrom(
+          padding: buttonPadding,
+          shape: buttonShape,
+        ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(shape: buttonShape),

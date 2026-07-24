@@ -21,7 +21,8 @@ class ResetPasswordScreen extends ConsumerStatefulWidget {
   final String? email;
 
   @override
-  ConsumerState<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  ConsumerState<ResetPasswordScreen> createState() =>
+      _ResetPasswordScreenState();
 }
 
 class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
@@ -47,7 +48,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   String? _requireEmail() {
     final email = widget.email;
     if (email == null) {
-      AppSnackBar.showError(context, 'Missing email. Please restart the reset flow.');
+      AppSnackBar.showError(
+        context,
+        'Missing email. Please restart the reset flow.',
+      );
     }
     return email;
   }
@@ -59,10 +63,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authControllerProvider.notifier).verifyResetOtp(
-            email: email,
-            otp: _otpController.text.trim(),
-          );
+      await ref
+          .read(authControllerProvider.notifier)
+          .verifyResetOtp(email: email, otp: _otpController.text.trim());
       if (!mounted) return;
       setState(() => _otpVerified = true);
     } on AppException catch (e) {
@@ -80,7 +83,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authControllerProvider.notifier).resetPassword(
+      await ref
+          .read(authControllerProvider.notifier)
+          .resetPassword(
             email: email,
             otp: _otpController.text.trim(),
             newPassword: _passwordController.text,
@@ -105,8 +110,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       subtitle: _otpVerified
           ? 'Choose a new password for your account.'
           : email == null
-              ? 'Enter the code we sent you.'
-              : 'Enter the code sent to $email.',
+          ? 'Enter the code we sent you.'
+          : 'Enter the code sent to $email.',
       child: _otpVerified ? _buildPasswordForm() : _buildCodeForm(),
     );
   }
@@ -124,7 +129,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             validator: Validators.otp,
           ),
           const SizedBox(height: AppSpacing.lg),
-          AppButton(label: 'Verify Code', isLoading: _isLoading, onPressed: _verifyCode),
+          AppButton(
+            label: 'Verify Code',
+            isLoading: _isLoading,
+            onPressed: _verifyCode,
+          ),
         ],
       ),
     );
@@ -143,9 +152,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             validator: Validators.password,
             suffixIcon: IconButton(
               icon: Icon(
-                _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
               ),
-              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -153,19 +165,26 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             controller: _confirmPasswordController,
             label: 'Confirm New Password',
             obscureText: _obscureConfirmPassword,
-            validator: Validators.confirmPassword(() => _passwordController.text),
+            validator: Validators.confirmPassword(
+              () => _passwordController.text,
+            ),
             suffixIcon: IconButton(
               icon: Icon(
                 _obscureConfirmPassword
                     ? Icons.visibility_outlined
                     : Icons.visibility_off_outlined,
               ),
-              onPressed: () =>
-                  setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+              onPressed: () => setState(
+                () => _obscureConfirmPassword = !_obscureConfirmPassword,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          AppButton(label: 'Reset Password', isLoading: _isLoading, onPressed: _submit),
+          AppButton(
+            label: 'Reset Password',
+            isLoading: _isLoading,
+            onPressed: _submit,
+          ),
         ],
       ),
     );

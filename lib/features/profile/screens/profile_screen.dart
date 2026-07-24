@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
 import '../../../core/widgets/error_widget.dart';
-import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../providers/profile_provider.dart';
 import '../../../routes/route_names.dart';
@@ -34,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: profileAsync.when(
-          loading: () => const LoadingWidget(message: 'Loading profile…'),
+          loading: () => const SkeletonDetail(),
           error: (error, _) => AppErrorWidget(
             message: error.toString(),
             onRetry: () => ref.invalidate(profileControllerProvider),
@@ -71,15 +71,22 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         child: Column(
                           children: [
-                            _ProfileField(label: 'Username', value: user.username),
+                            _ProfileField(
+                              label: 'Username',
+                              value: user.username,
+                            ),
                             const Divider(height: AppSpacing.lg),
-                            _ProfileField(label: 'Name', value: user.name ?? '—'),
+                            _ProfileField(
+                              label: 'Name',
+                              value: user.name ?? '—',
+                            ),
                             const Divider(height: AppSpacing.lg),
                             _ProfileField(
                               label: 'Gender',
                               value: user.gender == null || user.gender!.isEmpty
                                   ? '—'
-                                  : user.gender![0].toUpperCase() + user.gender!.substring(1),
+                                  : user.gender![0].toUpperCase() +
+                                        user.gender!.substring(1),
                             ),
                             const Divider(height: AppSpacing.lg),
                             _ProfileField(label: 'Email', value: user.email),
@@ -114,7 +121,12 @@ class _ProfileField extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+            child: Text(
+              label,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
           Expanded(
             flex: 2,

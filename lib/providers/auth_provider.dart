@@ -20,7 +20,9 @@ class AuthController extends AsyncNotifier<User?> {
     final token = await ref.read(secureStorageServiceProvider).readAuthToken();
     if (token == null) return null;
 
-    final cachedJson = ref.read(sharedPreferencesServiceProvider).cachedUserJson;
+    final cachedJson = ref
+        .read(sharedPreferencesServiceProvider)
+        .cachedUserJson;
     if (cachedJson == null) return null;
 
     return User.fromJson(jsonDecode(cachedJson) as Map<String, dynamic>);
@@ -33,7 +35,9 @@ class AuthController extends AsyncNotifier<User?> {
     required String email,
     required String password,
   }) {
-    return ref.read(authRepositoryProvider).signup(
+    return ref
+        .read(authRepositoryProvider)
+        .signup(
           username: username,
           name: name,
           gender: gender,
@@ -51,10 +55,9 @@ class AuthController extends AsyncNotifier<User?> {
   }
 
   Future<void> login({required String email, required String password}) async {
-    final result = await ref.read(authRepositoryProvider).login(
-          email: email,
-          password: password,
-        );
+    final result = await ref
+        .read(authRepositoryProvider)
+        .login(email: email, password: password);
     // Login only succeeds server-side for verified accounts, but the login
     // response itself doesn't echo `is_email_verified` — set it explicitly
     // so the cached session reflects reality.
@@ -68,7 +71,9 @@ class AuthController extends AsyncNotifier<User?> {
   }
 
   Future<void> verifyResetOtp({required String email, required String otp}) {
-    return ref.read(authRepositoryProvider).verifyResetOtp(email: email, otp: otp);
+    return ref
+        .read(authRepositoryProvider)
+        .verifyResetOtp(email: email, otp: otp);
   }
 
   Future<void> resetPassword({
@@ -76,11 +81,9 @@ class AuthController extends AsyncNotifier<User?> {
     required String otp,
     required String newPassword,
   }) {
-    return ref.read(authRepositoryProvider).resetPassword(
-          email: email,
-          otp: otp,
-          newPassword: newPassword,
-        );
+    return ref
+        .read(authRepositoryProvider)
+        .resetPassword(email: email, otp: otp, newPassword: newPassword);
   }
 
   /// Pushes an updated [User] (e.g. from a Profile fetch/edit) into the
@@ -89,7 +92,9 @@ class AuthController extends AsyncNotifier<User?> {
   /// source of truth.
   Future<void> setSessionUser(User user) async {
     state = AsyncValue.data(user);
-    await ref.read(sharedPreferencesServiceProvider).setCachedUserJson(jsonEncode(user.toJson()));
+    await ref
+        .read(sharedPreferencesServiceProvider)
+        .setCachedUserJson(jsonEncode(user.toJson()));
   }
 
   Future<void> logout() async {

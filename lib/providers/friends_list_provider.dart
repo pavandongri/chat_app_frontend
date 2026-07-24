@@ -8,9 +8,17 @@ class FriendsListController extends AutoDisposeAsyncNotifier<List<Friend>> {
   Future<List<Friend>> build() {
     return ref.read(friendsRepositoryProvider).getFriends();
   }
+
+  /// Unlike `ref.refresh(provider.future)`, a failure here never touches
+  /// `state` — it propagates straight to the caller, so the previously
+  /// loaded list stays visible instead of flashing to the error state.
+  Future<void> refresh() async {
+    final friends = await ref.read(friendsRepositoryProvider).getFriends();
+    state = AsyncValue.data(friends);
+  }
 }
 
 final friendsListControllerProvider =
     AutoDisposeAsyncNotifierProvider<FriendsListController, List<Friend>>(
-  FriendsListController.new,
-);
+      FriendsListController.new,
+    );

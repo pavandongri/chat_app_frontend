@@ -16,12 +16,21 @@ class ChatListController extends AutoDisposeAsyncNotifier<List<Conversation>> {
   Future<List<Conversation>> build() {
     return ref.read(chatRepositoryProvider).getConversations();
   }
+
+  /// Failure never touches `state`, so the previously loaded list stays
+  /// visible instead of flashing to the error state (per Story 16).
+  Future<void> refresh() async {
+    final conversations = await ref
+        .read(chatRepositoryProvider)
+        .getConversations();
+    state = AsyncValue.data(conversations);
+  }
 }
 
 final chatListControllerProvider =
     AutoDisposeAsyncNotifierProvider<ChatListController, List<Conversation>>(
-  ChatListController.new,
-);
+      ChatListController.new,
+    );
 
 final messageRepositoryProvider = Provider<MessageRepository>(
   (ref) => MessageRepository(ref.watch(dioClientProvider)),
@@ -89,12 +98,23 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
     }
 
     final lastPage = (probe.total / _pageSize).ceil();
-    final result = await repo.getConversation(_friendId, page: lastPage, limit: _pageSize);
+    final result = await repo.getConversation(
+      _friendId,
+      page: lastPage,
+      limit: _pageSize,
+    );
     return ChatState(
       messages: result.items,
       oldestLoadedPage: lastPage,
       hasMore: lastPage > 1,
     );
+  }
+
+  /// Failure never touches `state`, so previously loaded messages stay
+  /// visible instead of flashing to the error state (per Story 16).
+  Future<void> refresh() async {
+    final refreshed = await _loadMostRecent();
+    state = AsyncValue.data(refreshed);
   }
 
   Future<void> loadOlder() async {
@@ -108,12 +128,14 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
           .read(messageRepositoryProvider)
           .getConversation(_friendId, page: previousPage, limit: _pageSize);
       final latest = state.valueOrNull ?? current;
-      state = AsyncValue.data(latest.copyWith(
-        messages: [...result.items, ...latest.messages],
-        oldestLoadedPage: previousPage,
-        hasMore: previousPage > 1,
-        isLoadingMore: false,
-      ));
+      state = AsyncValue.data(
+        latest.copyWith(
+          messages: [...result.items, ...latest.messages],
+          oldestLoadedPage: previousPage,
+          hasMore: previousPage > 1,
+          isLoadingMore: false,
+        ),
+      );
     } catch (e) {
       final latest = state.valueOrNull ?? current;
       state = AsyncValue.data(latest.copyWith(isLoadingMore: false));
@@ -131,10 +153,9 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
           .read(messageRepositoryProvider)
           .sendMessage(receiverId: _friendId, message: text);
       final latest = state.valueOrNull ?? current;
-      state = AsyncValue.data(latest.copyWith(
-        messages: [...latest.messages, sent],
-        isSending: false,
-      ));
+      state = AsyncValue.data(
+        latest.copyWith(messages: [...latest.messages, sent], isSending: false),
+      );
     } catch (e) {
       final latest = state.valueOrNull ?? current;
       state = AsyncValue.data(latest.copyWith(isSending: false));
@@ -149,11 +170,18 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
     final current = state.valueOrNull;
     if (current == null) return;
 
-    final updated = await ref.read(messageRepositoryProvider).editMessage(messageId, newMessage);
+    final updated = await ref
+        .read(messageRepositoryProvider)
+        .editMessage(messageId, newMessage);
     final latest = state.valueOrNull ?? current;
-    state = AsyncValue.data(latest.copyWith(
-      messages: [for (final m in latest.messages) if (m.id == messageId) updated else m],
-    ));
+    state = AsyncValue.data(
+      latest.copyWith(
+        messages: [
+          for (final m in latest.messages)
+            if (m.id == messageId) updated else m,
+        ],
+      ),
+    );
   }
 
   /// Removes the message from state only after the backend confirms
@@ -165,13 +193,15 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
 
     await ref.read(messageRepositoryProvider).deleteMessage(messageId);
     final latest = state.valueOrNull ?? current;
-    state = AsyncValue.data(latest.copyWith(
-      messages: latest.messages.where((m) => m.id != messageId).toList(),
-    ));
+    state = AsyncValue.data(
+      latest.copyWith(
+        messages: latest.messages.where((m) => m.id != messageId).toList(),
+      ),
+    );
   }
 }
 
 final chatControllerProvider =
     AutoDisposeAsyncNotifierProviderFamily<ChatController, ChatState, String>(
-  ChatController.new,
-);
+      ChatController.new,
+    );

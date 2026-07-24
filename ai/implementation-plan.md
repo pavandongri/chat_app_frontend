@@ -56,8 +56,8 @@ story (see `../backend/ai/implementation-plan.md`) is already implemented.
 - [x] 13 — Edit Message
 - [x] 14 — Delete Message
 - [x] 15 — Online Status
-- [ ] 16 — Refresh Mechanism
-- [ ] 17 — Loading, Empty & Error States
-- [ ] 18 — Responsive Design
+- [x] 16 — Refresh Mechanism
+- [x] 17 — Loading, Empty & Error States
+- [x] 18 — Responsive Design
 - [ ] 19 — App Polish
 - [ ] 20 — Production Cleanup

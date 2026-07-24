@@ -6,7 +6,10 @@ import 'friends_provider.dart';
 enum FriendRequestButtonState { none, sending, sent }
 
 class SearchResult {
-  const SearchResult({required this.user, this.buttonState = FriendRequestButtonState.none});
+  const SearchResult({
+    required this.user,
+    this.buttonState = FriendRequestButtonState.none,
+  });
 
   final PublicUser user;
   final FriendRequestButtonState buttonState;
@@ -18,7 +21,8 @@ class SearchResult {
 /// Screen-scoped search state. Row-level "Requested" status is tracked
 /// locally after a successful send so the button updates immediately
 /// without re-querying the search endpoint.
-class SearchFriendsController extends AutoDisposeAsyncNotifier<List<SearchResult>> {
+class SearchFriendsController
+    extends AutoDisposeAsyncNotifier<List<SearchResult>> {
   String _lastQuery = '';
 
   @override
@@ -33,7 +37,9 @@ class SearchFriendsController extends AutoDisposeAsyncNotifier<List<SearchResult
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final users = await ref.read(friendsRepositoryProvider).searchUsers(_lastQuery);
+      final users = await ref
+          .read(friendsRepositoryProvider)
+          .searchUsers(_lastQuery);
       return users.map((user) => SearchResult(user: user)).toList();
     });
   }
@@ -56,12 +62,16 @@ class SearchFriendsController extends AutoDisposeAsyncNotifier<List<SearchResult
     if (current == null) return;
     state = AsyncValue.data([
       for (final result in current)
-        if (result.user.id == userId) result.copyWith(buttonState: buttonState) else result,
+        if (result.user.id == userId)
+          result.copyWith(buttonState: buttonState)
+        else
+          result,
     ]);
   }
 }
 
 final searchFriendsControllerProvider =
-    AutoDisposeAsyncNotifierProvider<SearchFriendsController, List<SearchResult>>(
-  SearchFriendsController.new,
-);
+    AutoDisposeAsyncNotifierProvider<
+      SearchFriendsController,
+      List<SearchResult>
+    >(SearchFriendsController.new);

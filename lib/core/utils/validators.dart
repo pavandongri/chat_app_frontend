@@ -4,8 +4,9 @@
 class Validators {
   Validators._();
 
-  static final RegExp _emailPattern =
-      RegExp(r'^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$');
+  static final RegExp _emailPattern = RegExp(
+    r'^[\w.\-]+@([\w\-]+\.)+[\w\-]{2,}$',
+  );
   static final RegExp _otpPattern = RegExp(r'^\d{6}$');
   static final RegExp _usernamePattern = RegExp(r'^[a-zA-Z0-9_]{3,20}$');
 
@@ -70,7 +71,9 @@ class Validators {
   static String? avatarUrl(String? value) {
     if (value == null || value.trim().isEmpty) return null;
     final uri = Uri.tryParse(value.trim());
-    if (uri == null || !uri.isAbsolute || !(uri.scheme == 'http' || uri.scheme == 'https')) {
+    if (uri == null ||
+        !uri.isAbsolute ||
+        !(uri.scheme == 'http' || uri.scheme == 'https')) {
       return 'Enter a valid URL';
     }
     return null;

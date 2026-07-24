@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/app_exception.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
-import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/max_width_box.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/conversation.dart';
 import '../../../models/message_status.dart';
@@ -31,6 +35,15 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     super.dispose();
   }
 
+  Future<void> _refresh() async {
+    try {
+      await ref.read(chatListControllerProvider.notifier).refresh();
+    } on AppException catch (e) {
+      if (!mounted) return;
+      AppSnackBar.showError(context, e.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final conversationsAsync = ref.watch(chatListControllerProvider);
@@ -38,61 +51,78 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Chats'),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
-              child: AppTextField(
-                controller: _searchController,
-                label: 'Search conversations',
-                suffixIcon: const Icon(Icons.search),
-                onChanged: (value) => setState(() => _query = value),
-              ),
-            ),
-            Expanded(
-              child: conversationsAsync.when(
-                loading: () => const LoadingWidget(message: 'Loading chats…'),
-                error: (error, _) => AppErrorWidget(
-                  message: error.toString(),
-                  onRetry: () => ref.invalidate(chatListControllerProvider),
+        child: MaxWidthBox(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  0,
                 ),
-                data: (conversations) {
-                  if (conversations.isEmpty) {
-                    return const EmptyStateWidget(
-                      message: 'No conversations yet — start one from your friends list.',
-                      icon: Icons.chat_bubble_outline_rounded,
-                    );
-                  }
-
-                  final filtered = _query.trim().isEmpty
-                      ? conversations
-                      : conversations
-                          .where((c) => c.friend.name.toLowerCase().contains(_query.trim().toLowerCase()))
-                          .toList();
-
-                  return RefreshIndicator(
-                    onRefresh: () => ref.refresh(chatListControllerProvider.future),
-                    child: filtered.isEmpty
-                        ? ListView(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            children: const [
-                              EmptyStateWidget(
-                                message: 'No conversations match your search.',
-                                icon: Icons.search_off_rounded,
-                              ),
-                            ],
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            itemCount: filtered.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
-                            itemBuilder: (context, index) => _ConversationCard(conversation: filtered[index]),
-                          ),
-                  );
-                },
+                child: AppTextField(
+                  controller: _searchController,
+                  label: 'Search conversations',
+                  suffixIcon: const Icon(Icons.search),
+                  onChanged: (value) => setState(() => _query = value),
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: conversationsAsync.when(
+                  loading: () => const SkeletonList(),
+                  error: (error, _) => AppErrorWidget(
+                    message: error.toString(),
+                    onRetry: () => ref.invalidate(chatListControllerProvider),
+                  ),
+                  data: (conversations) {
+                    if (conversations.isEmpty) {
+                      return const EmptyStateWidget(
+                        message:
+                            'No conversations yet — start one from your friends list.',
+                        icon: Icons.chat_bubble_outline_rounded,
+                      );
+                    }
+
+                    final filtered = _query.trim().isEmpty
+                        ? conversations
+                        : conversations
+                              .where(
+                                (c) => c.friend.name.toLowerCase().contains(
+                                  _query.trim().toLowerCase(),
+                                ),
+                              )
+                              .toList();
+
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: filtered.isEmpty
+                          ? ListView(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              children: const [
+                                EmptyStateWidget(
+                                  message:
+                                      'No conversations match your search.',
+                                  icon: Icons.search_off_rounded,
+                                ),
+                              ],
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              itemCount: filtered.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: AppSpacing.sm),
+                              itemBuilder: (context, index) =>
+                                  _ConversationCard(
+                                    conversation: filtered[index],
+                                  ),
+                            ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -113,13 +143,20 @@ class _ConversationCard extends StatelessWidget {
 
     return Card(
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgRadius,
         onTap: () => context.push(RouteNames.chat, extra: friend),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           child: Row(
             children: [
-              UserAvatar(name: friend.name, avatarUrl: friend.avatarUrl, radius: 26),
+              UserAvatar(
+                name: friend.name,
+                avatarUrl: friend.avatarUrl,
+                radius: 26,
+              ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -135,15 +172,26 @@ class _ConversationCard extends StatelessWidget {
                     Row(
                       children: [
                         if (conversation.lastMessageFromMe) ...[
-                          Icon(_statusIcon(conversation.status), size: 16, color: _statusColor(conversation.status, colorScheme)),
+                          Icon(
+                            _statusIcon(conversation.status),
+                            size: 16,
+                            color: _statusColor(
+                              conversation.status,
+                              colorScheme,
+                            ),
+                          ),
                           const SizedBox(width: 4),
                         ],
                         Expanded(
                           child: Text(
                             conversation.lastMessage,
                             style: textTheme.bodyMedium?.copyWith(
-                              color: hasUnread ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
-                              fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
+                              color: hasUnread
+                                  ? colorScheme.onSurface
+                                  : colorScheme.onSurfaceVariant,
+                              fontWeight: hasUnread
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -160,21 +208,30 @@ class _ConversationCard extends StatelessWidget {
                   Text(
                     _formatTimestamp(conversation.lastMessageAt),
                     style: textTheme.bodySmall?.copyWith(
-                      color: hasUnread ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                      fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
+                      color: hasUnread
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: hasUnread
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                   const SizedBox(height: 6),
                   if (hasUnread)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: AppRadius.fullRadius,
                       ),
                       child: Text(
                         '${conversation.unreadCount}',
-                        style: textTheme.labelMedium?.copyWith(color: colorScheme.onPrimary),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                 ],
@@ -198,7 +255,9 @@ class _ConversationCard extends StatelessWidget {
   }
 
   Color _statusColor(MessageStatus status, ColorScheme colorScheme) {
-    return status == MessageStatus.seen ? colorScheme.primary : colorScheme.onSurfaceVariant;
+    return status == MessageStatus.seen
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
   }
 
   String _formatTimestamp(DateTime time) {

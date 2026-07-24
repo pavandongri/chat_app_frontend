@@ -30,61 +30,86 @@ class FriendRequestsState {
   }
 }
 
-class FriendRequestsController extends AutoDisposeAsyncNotifier<FriendRequestsState> {
+class FriendRequestsController
+    extends AutoDisposeAsyncNotifier<FriendRequestsState> {
   @override
   Future<FriendRequestsState> build() async {
-    final result = await ref.read(friendsRepositoryProvider).getFriendRequests();
-    return FriendRequestsState(incoming: result.incoming, outgoing: result.outgoing);
+    final result = await ref
+        .read(friendsRepositoryProvider)
+        .getFriendRequests();
+    return FriendRequestsState(
+      incoming: result.incoming,
+      outgoing: result.outgoing,
+    );
+  }
+
+  /// Failure never touches `state`, so previously loaded requests stay
+  /// visible instead of flashing to the error state (per Story 16).
+  Future<void> refresh() async {
+    final result = await ref
+        .read(friendsRepositoryProvider)
+        .getFriendRequests();
+    state = AsyncValue.data(
+      FriendRequestsState(incoming: result.incoming, outgoing: result.outgoing),
+    );
   }
 
   Future<void> accept(String requestId) => _act(
-        requestId,
-        action: () => ref.read(friendsRepositoryProvider).acceptRequest(requestId),
-        onSuccess: (current) => current.copyWith(
-          incoming: current.incoming.where((r) => r.id != requestId).toList(),
-        ),
-      );
+    requestId,
+    action: () => ref.read(friendsRepositoryProvider).acceptRequest(requestId),
+    onSuccess: (current) => current.copyWith(
+      incoming: current.incoming.where((r) => r.id != requestId).toList(),
+    ),
+  );
 
   Future<void> reject(String requestId) => _act(
-        requestId,
-        action: () => ref.read(friendsRepositoryProvider).rejectRequest(requestId),
-        onSuccess: (current) => current.copyWith(
-          incoming: current.incoming.where((r) => r.id != requestId).toList(),
-        ),
-      );
+    requestId,
+    action: () => ref.read(friendsRepositoryProvider).rejectRequest(requestId),
+    onSuccess: (current) => current.copyWith(
+      incoming: current.incoming.where((r) => r.id != requestId).toList(),
+    ),
+  );
 
   Future<void> cancel(String requestId) => _act(
-        requestId,
-        action: () => ref.read(friendsRepositoryProvider).cancelRequest(requestId),
-        onSuccess: (current) => current.copyWith(
-          outgoing: current.outgoing.where((r) => r.id != requestId).toList(),
-        ),
-      );
+    requestId,
+    action: () => ref.read(friendsRepositoryProvider).cancelRequest(requestId),
+    onSuccess: (current) => current.copyWith(
+      outgoing: current.outgoing.where((r) => r.id != requestId).toList(),
+    ),
+  );
 
   Future<void> _act(
     String requestId, {
     required Future<void> Function() action,
-    required FriendRequestsState Function(FriendRequestsState current) onSuccess,
+    required FriendRequestsState Function(FriendRequestsState current)
+    onSuccess,
   }) async {
     final current = state.valueOrNull;
     if (current == null) return;
 
-    state = AsyncValue.data(current.copyWith(pendingIds: {...current.pendingIds, requestId}));
+    state = AsyncValue.data(
+      current.copyWith(pendingIds: {...current.pendingIds, requestId}),
+    );
     try {
       await action();
       final latest = state.valueOrNull ?? current;
       state = AsyncValue.data(
-        onSuccess(latest).copyWith(pendingIds: latest.pendingIds.difference({requestId})),
+        onSuccess(
+          latest,
+        ).copyWith(pendingIds: latest.pendingIds.difference({requestId})),
       );
     } catch (e) {
       final latest = state.valueOrNull ?? current;
-      state = AsyncValue.data(latest.copyWith(pendingIds: latest.pendingIds.difference({requestId})));
+      state = AsyncValue.data(
+        latest.copyWith(pendingIds: latest.pendingIds.difference({requestId})),
+      );
       rethrow;
     }
   }
 }
 
 final friendRequestsControllerProvider =
-    AutoDisposeAsyncNotifierProvider<FriendRequestsController, FriendRequestsState>(
-  FriendRequestsController.new,
-);
+    AutoDisposeAsyncNotifierProvider<
+      FriendRequestsController,
+      FriendRequestsState
+    >(FriendRequestsController.new);

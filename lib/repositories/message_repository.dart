@@ -44,7 +44,9 @@ class MessageRepository {
       );
       final data = ResponseParser.data(response)!;
       return ConversationPage(
-        items: (data['items'] as List).map((json) => Message.fromJson(json)).toList(),
+        items: (data['items'] as List)
+            .map((json) => Message.fromJson(json))
+            .toList(),
         page: data['page'] as int,
         limit: data['limit'] as int,
         total: data['total'] as int,
@@ -54,12 +56,15 @@ class MessageRepository {
     }
   }
 
-  Future<Message> sendMessage({required String receiverId, required String message}) async {
+  Future<Message> sendMessage({
+    required String receiverId,
+    required String message,
+  }) async {
     try {
-      final response = await _dioClient.dio.post('/messages', data: {
-        'receiverId': receiverId,
-        'message': message,
-      });
+      final response = await _dioClient.dio.post(
+        '/messages',
+        data: {'receiverId': receiverId, 'message': message},
+      );
       return Message.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
@@ -68,7 +73,10 @@ class MessageRepository {
 
   Future<Message> editMessage(String messageId, String newMessage) async {
     try {
-      final response = await _dioClient.dio.put('/messages/$messageId', data: {'message': newMessage});
+      final response = await _dioClient.dio.put(
+        '/messages/$messageId',
+        data: {'message': newMessage},
+      );
       return Message.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);

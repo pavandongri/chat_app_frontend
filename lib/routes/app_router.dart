@@ -46,8 +46,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (location == RouteNames.splash) {
         return isLoggedIn ? RouteNames.home : RouteNames.login;
       }
-      if (!isLoggedIn && !_authRoutes.contains(location)) return RouteNames.login;
-      if (isLoggedIn && _authRoutes.contains(location)) return RouteNames.home;
+      if (!isLoggedIn && !_authRoutes.contains(location)) {
+        return RouteNames.login;
+      }
+      if (isLoggedIn && _authRoutes.contains(location)) {
+        return RouteNames.home;
+      }
       return null;
     },
     routes: [
@@ -87,7 +91,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RouteNames.editProfile,
-        builder: (context, state) => EditProfileScreen(user: state.extra as User),
+        builder: (context, state) =>
+            EditProfileScreen(user: state.extra as User),
       ),
       GoRoute(
         path: RouteNames.searchFriends,

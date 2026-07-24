@@ -10,7 +10,8 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
-import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/max_width_box.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../providers/search_friends_provider.dart';
 
@@ -18,7 +19,8 @@ class SearchFriendsScreen extends ConsumerStatefulWidget {
   const SearchFriendsScreen({super.key});
 
   @override
-  ConsumerState<SearchFriendsScreen> createState() => _SearchFriendsScreenState();
+  ConsumerState<SearchFriendsScreen> createState() =>
+      _SearchFriendsScreenState();
 }
 
 class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
@@ -41,7 +43,9 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
 
   Future<void> _sendRequest(String userId) async {
     try {
-      await ref.read(searchFriendsControllerProvider.notifier).sendRequest(userId);
+      await ref
+          .read(searchFriendsControllerProvider.notifier)
+          .sendRequest(userId);
     } on AppException catch (e) {
       if (!mounted) return;
       AppSnackBar.showError(context, e.message);
@@ -55,59 +59,64 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Search Friends'),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: AppTextField(
-                controller: _searchController,
-                label: 'Search by name',
-                hint: 'e.g. Jane Doe',
-                suffixIcon: const Icon(Icons.search),
-                onChanged: _onChanged,
-              ),
-            ),
-            Expanded(
-              child: resultsAsync.when(
-                loading: () => const LoadingWidget(message: 'Searching…'),
-                error: (error, _) => AppErrorWidget(
-                  message: error.toString(),
-                  onRetry: () => ref.read(searchFriendsControllerProvider.notifier).retry(),
+        child: MaxWidthBox(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: AppTextField(
+                  controller: _searchController,
+                  label: 'Search by name',
+                  hint: 'e.g. Jane Doe',
+                  suffixIcon: const Icon(Icons.search),
+                  onChanged: _onChanged,
                 ),
-                data: (results) {
-                  if (_searchController.text.trim().isEmpty) {
-                    return const EmptyStateWidget(
-                      message: 'Search for friends by name.',
-                      icon: Icons.person_search_outlined,
-                    );
-                  }
-                  if (results.isEmpty) {
-                    return const EmptyStateWidget(
-                      message: 'No users found.',
-                      icon: Icons.search_off_rounded,
-                    );
-                  }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      0,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                    ),
-                    itemCount: results.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (context, index) {
-                      final result = results[index];
-                      return _SearchResultCard(
-                        result: result,
-                        onSendRequest: () => _sendRequest(result.user.id),
-                      );
-                    },
-                  );
-                },
               ),
-            ),
-          ],
+              Expanded(
+                child: resultsAsync.when(
+                  loading: () => const SkeletonList(),
+                  error: (error, _) => AppErrorWidget(
+                    message: error.toString(),
+                    onRetry: () => ref
+                        .read(searchFriendsControllerProvider.notifier)
+                        .retry(),
+                  ),
+                  data: (results) {
+                    if (_searchController.text.trim().isEmpty) {
+                      return const EmptyStateWidget(
+                        message: 'Search for friends by name.',
+                        icon: Icons.person_search_outlined,
+                      );
+                    }
+                    if (results.isEmpty) {
+                      return const EmptyStateWidget(
+                        message: 'No users found.',
+                        icon: Icons.search_off_rounded,
+                      );
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        0,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                      ),
+                      itemCount: results.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: AppSpacing.sm),
+                      itemBuilder: (context, index) {
+                        final result = results[index];
+                        return _SearchResultCard(
+                          result: result,
+                          onSendRequest: () => _sendRequest(result.user.id),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -126,7 +135,10 @@ class _SearchResultCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: Row(
           children: [
             UserAvatar(name: user.name, avatarUrl: user.avatarUrl, radius: 24),
@@ -176,7 +188,10 @@ class _ActionButton extends StatelessWidget {
       case FriendRequestButtonState.sent:
         return const OutlinedButton(onPressed: null, child: Text('Requested'));
       case FriendRequestButtonState.none:
-        return FilledButton.tonal(onPressed: onPressed, child: const Text('Add'));
+        return FilledButton.tonal(
+          onPressed: onPressed,
+          child: const Text('Add'),
+        );
     }
   }
 }

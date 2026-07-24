@@ -14,13 +14,9 @@ class AppColors {
   static const Color onlineIndicator = Color(0xFF4CAF50);
   static const Color offlineIndicator = Color(0xFF9E9E9E);
 
-  static ColorScheme get lightScheme => ColorScheme.fromSeed(
-        seedColor: seedLight,
-        brightness: Brightness.light,
-      );
+  static ColorScheme get lightScheme =>
+      ColorScheme.fromSeed(seedColor: seedLight, brightness: Brightness.light);
 
-  static ColorScheme get darkScheme => ColorScheme.fromSeed(
-        seedColor: seedDark,
-        brightness: Brightness.dark,
-      );
+  static ColorScheme get darkScheme =>
+      ColorScheme.fromSeed(seedColor: seedDark, brightness: Brightness.dark);
 }

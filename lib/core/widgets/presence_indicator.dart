@@ -6,7 +6,12 @@ import '../theme/app_colors.dart';
 /// Friends List and Chat Screen so presence rendering isn't duplicated per
 /// screen (Story 15).
 class PresenceDot extends StatelessWidget {
-  const PresenceDot({super.key, required this.isOnline, this.size = 12, this.borderColor});
+  const PresenceDot({
+    super.key,
+    required this.isOnline,
+    this.size = 12,
+    this.borderColor,
+  });
 
   final bool isOnline;
   final double size;
@@ -19,7 +24,9 @@ class PresenceDot extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isOnline ? AppColors.onlineIndicator : AppColors.offlineIndicator,
+        color: isOnline
+            ? AppColors.onlineIndicator
+            : AppColors.offlineIndicator,
         border: Border.all(
           color: borderColor ?? Theme.of(context).colorScheme.surface,
           width: 2,
@@ -33,7 +40,12 @@ class PresenceDot extends StatelessWidget {
 /// [PresenceDot]. `lastSeen` is only ever a snapshot from the last fetch,
 /// never live (per `coding-standards.md`'s manual-refresh-only rule).
 class PresenceStatusText extends StatelessWidget {
-  const PresenceStatusText({super.key, required this.isOnline, required this.lastSeen, this.style});
+  const PresenceStatusText({
+    super.key,
+    required this.isOnline,
+    required this.lastSeen,
+    this.style,
+  });
 
   final bool isOnline;
   final DateTime? lastSeen;
@@ -48,7 +60,9 @@ class PresenceStatusText extends StatelessWidget {
       isOnline ? 'Online' : _offlineLabel(),
       overflow: TextOverflow.ellipsis,
       style: baseStyle?.copyWith(
-        color: isOnline ? AppColors.onlineIndicator : colorScheme.onSurfaceVariant,
+        color: isOnline
+            ? AppColors.onlineIndicator
+            : colorScheme.onSurfaceVariant,
       ),
     );
   }

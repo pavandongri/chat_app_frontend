@@ -16,7 +16,8 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
@@ -37,10 +38,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
     try {
       final email = _emailController.text.trim();
-      await ref.read(authControllerProvider.notifier).forgotPassword(email: email);
+      await ref
+          .read(authControllerProvider.notifier)
+          .forgotPassword(email: email);
       if (!mounted) return;
       context.push(
-        Uri(path: RouteNames.resetPassword, queryParameters: {'email': email}).toString(),
+        Uri(
+          path: RouteNames.resetPassword,
+          queryParameters: {'email': email},
+        ).toString(),
       );
     } on AppException catch (e) {
       if (!mounted) return;

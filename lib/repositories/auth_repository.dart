@@ -19,13 +19,16 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      final response = await _dioClient.dio.post('/auth/signup', data: {
-        'username': username,
-        'name': name,
-        'gender': gender,
-        'email': email,
-        'password': password,
-      });
+      final response = await _dioClient.dio.post(
+        '/auth/signup',
+        data: {
+          'username': username,
+          'name': name,
+          'gender': gender,
+          'email': email,
+          'password': password,
+        },
+      );
       return User.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
@@ -34,10 +37,10 @@ class AuthRepository {
 
   Future<void> verifyEmail({required String email, required String otp}) async {
     try {
-      await _dioClient.dio.post('/auth/verify-email', data: {
-        'email': email,
-        'otp': otp,
-      });
+      await _dioClient.dio.post(
+        '/auth/verify-email',
+        data: {'email': email, 'otp': otp},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }
@@ -56,10 +59,10 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      final response = await _dioClient.dio.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
+      final response = await _dioClient.dio.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
       final data = ResponseParser.data(response)!;
       return (
         user: User.fromJson(data['user'] as Map<String, dynamic>),
@@ -72,18 +75,24 @@ class AuthRepository {
 
   Future<void> forgotPassword({required String email}) async {
     try {
-      await _dioClient.dio.post('/auth/forgot-password', data: {'email': email});
+      await _dioClient.dio.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }
   }
 
-  Future<void> verifyResetOtp({required String email, required String otp}) async {
+  Future<void> verifyResetOtp({
+    required String email,
+    required String otp,
+  }) async {
     try {
-      await _dioClient.dio.post('/auth/verify-reset-otp', data: {
-        'email': email,
-        'otp': otp,
-      });
+      await _dioClient.dio.post(
+        '/auth/verify-reset-otp',
+        data: {'email': email, 'otp': otp},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }
@@ -95,11 +104,10 @@ class AuthRepository {
     required String newPassword,
   }) async {
     try {
-      await _dioClient.dio.post('/auth/reset-password', data: {
-        'email': email,
-        'otp': otp,
-        'newPassword': newPassword,
-      });
+      await _dioClient.dio.post(
+        '/auth/reset-password',
+        data: {'email': email, 'otp': otp, 'newPassword': newPassword},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }

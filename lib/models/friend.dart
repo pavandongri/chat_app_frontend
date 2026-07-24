@@ -22,7 +22,9 @@ class Friend {
       name: json['name'] as String,
       avatarUrl: json['avatarUrl'] as String?,
       isOnline: json['isOnline'] as bool? ?? false,
-      lastSeen: json['lastSeen'] == null ? null : DateTime.parse(json['lastSeen'] as String),
+      lastSeen: json['lastSeen'] == null
+          ? null
+          : DateTime.parse(json['lastSeen'] as String),
     );
   }
 }

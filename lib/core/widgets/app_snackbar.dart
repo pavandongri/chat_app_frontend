@@ -11,7 +11,11 @@ class AppSnackBar {
     _show(context, message, isError: true);
   }
 
-  static void _show(BuildContext context, String message, {bool isError = false}) {
+  static void _show(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     final messenger = ScaffoldMessenger.of(context);
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(

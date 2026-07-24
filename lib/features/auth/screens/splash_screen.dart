@@ -41,7 +41,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.chat_bubble_rounded, size: 72, color: colorScheme.primary),
+            Icon(
+              Icons.chat_bubble_rounded,
+              size: 72,
+              color: colorScheme.primary,
+            ),
             const SizedBox(height: AppSpacing.md),
             Text('Chat App', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: AppSpacing.xl),

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,8 +12,9 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
-import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/presence_indicator.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/friend.dart';
 import '../../../models/message.dart';
@@ -63,7 +66,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _scrollToBottom({bool animate = true}) {
     if (!_scrollController.hasClients) return;
     if (animate) {
-      _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     } else {
       _scrollController.jumpTo(0);
     }
@@ -71,7 +78,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Future<void> _loadOlder() async {
     try {
-      await ref.read(chatControllerProvider(widget.friend.id).notifier).loadOlder();
+      await ref
+          .read(chatControllerProvider(widget.friend.id).notifier)
+          .loadOlder();
     } on AppException catch (e) {
       if (!mounted) return;
       AppSnackBar.showError(context, e.message);
@@ -83,7 +92,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (text.isEmpty) return;
 
     try {
-      await ref.read(chatControllerProvider(widget.friend.id).notifier).send(text);
+      await ref
+          .read(chatControllerProvider(widget.friend.id).notifier)
+          .send(text);
       if (!mounted) return;
       _messageController.clear();
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
@@ -112,8 +123,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.delete_outline, color: Theme.of(sheetContext).colorScheme.error),
-              title: Text('Delete', style: TextStyle(color: Theme.of(sheetContext).colorScheme.error)),
+              leading: Icon(
+                Icons.delete_outline,
+                color: Theme.of(sheetContext).colorScheme.error,
+              ),
+              title: Text(
+                'Delete',
+                style: TextStyle(
+                  color: Theme.of(sheetContext).colorScheme.error,
+                ),
+              ),
               onTap: () {
                 Navigator.of(sheetContext).pop();
                 _confirmAndDelete(message);
@@ -165,13 +184,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               left: AppSpacing.lg,
               right: AppSpacing.lg,
               top: AppSpacing.lg,
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom + AppSpacing.lg,
+              bottom:
+                  MediaQuery.of(sheetContext).viewInsets.bottom + AppSpacing.lg,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Edit message', style: Theme.of(sheetContext).textTheme.titleLarge),
+                Text(
+                  'Edit message',
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
+                ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(controller: editController, label: 'Message'),
                 const SizedBox(height: AppSpacing.lg),
@@ -179,13 +202,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: isSaving ? null : () => Navigator.of(sheetContext).pop(),
+                        onPressed: isSaving
+                            ? null
+                            : () => Navigator.of(sheetContext).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
-                      child: AppButton(label: 'Save', isLoading: isSaving, onPressed: save),
+                      child: AppButton(
+                        label: 'Save',
+                        isLoading: isSaving,
+                        onPressed: save,
+                      ),
                     ),
                   ],
                 ),
@@ -202,13 +231,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final confirmed = await AppDialog.confirm(
       context,
       title: 'Delete message?',
-      message: 'This message will be permanently deleted. This cannot be undone.',
+      message:
+          'This message will be permanently deleted. This cannot be undone.',
       confirmLabel: 'Delete',
     );
     if (!confirmed) return;
 
     try {
-      await ref.read(chatControllerProvider(widget.friend.id).notifier).deleteMessage(message.id);
+      await ref
+          .read(chatControllerProvider(widget.friend.id).notifier)
+          .deleteMessage(message.id);
     } on AppException catch (e) {
       if (!mounted) return;
       AppSnackBar.showError(context, e.message);
@@ -218,8 +250,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _refresh() async {
     setState(() => _isRefreshing = true);
     try {
-      // ignore: unused_result
-      await ref.refresh(chatControllerProvider(widget.friend.id).future);
+      await ref
+          .read(chatControllerProvider(widget.friend.id).notifier)
+          .refresh();
     } on AppException catch (e) {
       if (mounted) AppSnackBar.showError(context, e.message);
     } finally {
@@ -232,13 +265,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatAsync = ref.watch(chatControllerProvider(widget.friend.id));
 
     return Scaffold(
-      appBar: _ChatAppBar(friend: widget.friend, isRefreshing: _isRefreshing, onRefresh: _refresh),
+      appBar: _ChatAppBar(
+        friend: widget.friend,
+        isRefreshing: _isRefreshing,
+        onRefresh: _refresh,
+      ),
       body: SafeArea(
         child: chatAsync.when(
-          loading: () => const LoadingWidget(message: 'Loading messages…'),
+          loading: () => const SkeletonChatBubbles(),
           error: (error, _) => AppErrorWidget(
             message: error.toString(),
-            onRetry: () => ref.invalidate(chatControllerProvider(widget.friend.id)),
+            onRetry: () =>
+                ref.invalidate(chatControllerProvider(widget.friend.id)),
           ),
           data: _buildConversation,
         ),
@@ -249,56 +287,75 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget _buildConversation(ChatState chatState) {
     if (!_didInitialScroll) {
       _didInitialScroll = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom(animate: false));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollToBottom(animate: false),
+      );
     }
 
     final myId = ref.watch(authControllerProvider).valueOrNull?.id;
     final reversedMessages = chatState.messages.reversed.toList();
 
-    return Column(
-      children: [
-        Expanded(
-          child: chatState.messages.isEmpty
-              ? const EmptyStateWidget(
-                  message: 'No messages yet — say hi!',
-                  icon: Icons.chat_bubble_outline_rounded,
-                )
-              : ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  itemCount: reversedMessages.length + (chatState.isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == reversedMessages.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                        child: Center(
-                          child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                        ),
+    return MaxWidthBox(
+      maxWidth: 800,
+      child: Column(
+        children: [
+          Expanded(
+            child: chatState.messages.isEmpty
+                ? const EmptyStateWidget(
+                    message: 'No messages yet — say hi!',
+                    icon: Icons.chat_bubble_outline_rounded,
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    reverse: true,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    itemCount:
+                        reversedMessages.length +
+                        (chatState.isLoadingMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == reversedMessages.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: AppSpacing.md,
+                          ),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      }
+                      final message = reversedMessages[index];
+                      final isMine = message.senderId == myId;
+                      return _MessageBubble(
+                        message: message,
+                        isMine: isMine,
+                        onLongPress: isMine
+                            ? () => _onBubbleLongPress(message)
+                            : null,
                       );
-                    }
-                    final message = reversedMessages[index];
-                    final isMine = message.senderId == myId;
-                    return _MessageBubble(
-                      message: message,
-                      isMine: isMine,
-                      onLongPress: isMine ? () => _onBubbleLongPress(message) : null,
-                    );
-                  },
-                ),
-        ),
-        _MessageInputBar(
-          controller: _messageController,
-          isSending: chatState.isSending,
-          onSend: _send,
-        ),
-      ],
+                    },
+                  ),
+          ),
+          _MessageInputBar(
+            controller: _messageController,
+            isSending: chatState.isSending,
+            onSend: _send,
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _ChatAppBar({required this.friend, required this.isRefreshing, required this.onRefresh});
+  const _ChatAppBar({
+    required this.friend,
+    required this.isRefreshing,
+    required this.onRefresh,
+  });
 
   final Friend friend;
   final bool isRefreshing;
@@ -312,7 +369,11 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Stack(
             children: [
-              UserAvatar(name: friend.name, avatarUrl: friend.avatarUrl, radius: 18),
+              UserAvatar(
+                name: friend.name,
+                avatarUrl: friend.avatarUrl,
+                radius: 18,
+              ),
               Positioned(
                 right: 0,
                 bottom: 0,
@@ -326,8 +387,15 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(friend.name, style: Theme.of(context).textTheme.titleMedium, overflow: TextOverflow.ellipsis),
-                PresenceStatusText(isOnline: friend.isOnline, lastSeen: friend.lastSeen),
+                Text(
+                  friend.name,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                PresenceStatusText(
+                  isOnline: friend.isOnline,
+                  lastSeen: friend.lastSeen,
+                ),
               ],
             ),
           ),
@@ -337,10 +405,18 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         if (isRefreshing)
           const Padding(
             padding: EdgeInsets.all(AppSpacing.md),
-            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
           )
         else
-          IconButton(icon: const Icon(Icons.refresh_rounded), tooltip: 'Refresh', onPressed: onRefresh),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh',
+            onPressed: onRefresh,
+          ),
       ],
     );
   }
@@ -350,7 +426,11 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message, required this.isMine, this.onLongPress});
+  const _MessageBubble({
+    required this.message,
+    required this.isMine,
+    this.onLongPress,
+  });
 
   final Message message;
   final bool isMine;
@@ -359,46 +439,63 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bubbleColor = isMine ? colorScheme.primaryContainer : colorScheme.surfaceContainerHigh;
-    final textColor = isMine ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
+    final bubbleColor = isMine
+        ? colorScheme.primaryContainer
+        : colorScheme.surfaceContainerHigh;
+    final textColor = isMine
+        ? colorScheme.onPrimaryContainer
+        : colorScheme.onSurface;
 
     return GestureDetector(
       onLongPress: onLongPress,
       child: Align(
         alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.75),
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          constraints: BoxConstraints(
+            maxWidth: math.min(MediaQuery.sizeOf(context).width * 0.75, 420),
+          ),
+          margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           decoration: BoxDecoration(
             color: bubbleColor,
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(AppRadius.lg),
               topRight: const Radius.circular(AppRadius.lg),
               bottomLeft: Radius.circular(isMine ? AppRadius.lg : AppRadius.sm),
-              bottomRight: Radius.circular(isMine ? AppRadius.sm : AppRadius.lg),
+              bottomRight: Radius.circular(
+                isMine ? AppRadius.sm : AppRadius.lg,
+              ),
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(message.message, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: textColor)),
+              Text(
+                message.message,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: textColor),
+              ),
               const SizedBox(height: 2),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     _formatTime(message.createdAt),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: textColor.withValues(alpha: 0.7)),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: textColor.withValues(alpha: 0.7),
+                    ),
                   ),
                   if (isMine) ...[
                     const SizedBox(width: 4),
                     Icon(
-                      message.status == MessageStatus.sent ? Icons.check : Icons.done_all,
+                      message.status == MessageStatus.sent
+                          ? Icons.check
+                          : Icons.done_all,
                       size: 14,
                       color: message.status == MessageStatus.seen
                           ? colorScheme.primary
@@ -422,7 +519,11 @@ class _MessageBubble extends StatelessWidget {
 }
 
 class _MessageInputBar extends StatelessWidget {
-  const _MessageInputBar({required this.controller, required this.isSending, required this.onSend});
+  const _MessageInputBar({
+    required this.controller,
+    required this.isSending,
+    required this.onSend,
+  });
 
   final TextEditingController controller;
   final bool isSending;

@@ -14,7 +14,10 @@ class FriendsRepository {
 
   Future<List<PublicUser>> searchUsers(String name) async {
     try {
-      final response = await _dioClient.dio.get('/users/search', queryParameters: {'name': name});
+      final response = await _dioClient.dio.get(
+        '/users/search',
+        queryParameters: {'name': name},
+      );
       final data = ResponseParser.list(response);
       return data.map((json) => PublicUser.fromJson(json)).toList();
     } on DioException catch (e) {
@@ -24,7 +27,10 @@ class FriendsRepository {
 
   Future<void> sendFriendRequest(String receiverId) async {
     try {
-      await _dioClient.dio.post('/friends/request', data: {'receiverId': receiverId});
+      await _dioClient.dio.post(
+        '/friends/request',
+        data: {'receiverId': receiverId},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }
@@ -40,13 +46,18 @@ class FriendsRepository {
     }
   }
 
-  Future<({List<FriendRequest> incoming, List<FriendRequest> outgoing})> getFriendRequests() async {
+  Future<({List<FriendRequest> incoming, List<FriendRequest> outgoing})>
+  getFriendRequests() async {
     try {
       final response = await _dioClient.dio.get('/friends/requests');
       final data = ResponseParser.data(response)!;
       return (
-        incoming: (data['incoming'] as List).map((json) => FriendRequest.fromJson(json)).toList(),
-        outgoing: (data['outgoing'] as List).map((json) => FriendRequest.fromJson(json)).toList(),
+        incoming: (data['incoming'] as List)
+            .map((json) => FriendRequest.fromJson(json))
+            .toList(),
+        outgoing: (data['outgoing'] as List)
+            .map((json) => FriendRequest.fromJson(json))
+            .toList(),
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
@@ -55,7 +66,10 @@ class FriendsRepository {
 
   Future<void> acceptRequest(String requestId) async {
     try {
-      await _dioClient.dio.post('/friends/accept', data: {'requestId': requestId});
+      await _dioClient.dio.post(
+        '/friends/accept',
+        data: {'requestId': requestId},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }
@@ -63,7 +77,10 @@ class FriendsRepository {
 
   Future<void> rejectRequest(String requestId) async {
     try {
-      await _dioClient.dio.post('/friends/reject', data: {'requestId': requestId});
+      await _dioClient.dio.post(
+        '/friends/reject',
+        data: {'requestId': requestId},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }
@@ -71,7 +88,10 @@ class FriendsRepository {
 
   Future<void> cancelRequest(String requestId) async {
     try {
-      await _dioClient.dio.delete('/friends/cancel', data: {'requestId': requestId});
+      await _dioClient.dio.delete(
+        '/friends/cancel',
+        data: {'requestId': requestId},
+      );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }

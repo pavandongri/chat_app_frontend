@@ -20,17 +20,20 @@ class ProfileController extends AutoDisposeAsyncNotifier<User> {
     return profile;
   }
 
-  Future<void> updateProfile({String? name, String? gender, String? avatarUrl}) async {
-    final updated = await ref.read(profileRepositoryProvider).updateProfile(
-          name: name,
-          gender: gender,
-          avatarUrl: avatarUrl,
-        );
+  Future<void> updateProfile({
+    String? name,
+    String? gender,
+    String? avatarUrl,
+  }) async {
+    final updated = await ref
+        .read(profileRepositoryProvider)
+        .updateProfile(name: name, gender: gender, avatarUrl: avatarUrl);
     state = AsyncValue.data(updated);
     await ref.read(authControllerProvider.notifier).setSessionUser(updated);
   }
 }
 
-final profileControllerProvider = AutoDisposeAsyncNotifierProvider<ProfileController, User>(
-  ProfileController.new,
-);
+final profileControllerProvider =
+    AutoDisposeAsyncNotifierProvider<ProfileController, User>(
+      ProfileController.new,
+    );

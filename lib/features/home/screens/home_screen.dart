@@ -68,7 +68,9 @@ class HomeScreen extends ConsumerWidget {
         showBackButton: false,
         actions: [
           IconButton(
-            icon: Icon(isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded),
+            icon: Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+            ),
             tooltip: 'Toggle theme',
             onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
           ),
@@ -89,21 +91,26 @@ class HomeScreen extends ConsumerWidget {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: _destinations.length,
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 220,
-                      mainAxisSpacing: AppSpacing.md,
-                      crossAxisSpacing: AppSpacing.md,
-                      childAspectRatio: 1.05,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 220,
+                          mainAxisSpacing: AppSpacing.md,
+                          crossAxisSpacing: AppSpacing.md,
+                          childAspectRatio: 1.05,
+                        ),
                     itemBuilder: (context, index) => _AnimatedEntrance(
                       delay: Duration(milliseconds: 60 * index),
-                      child: _DestinationCard(destination: _destinations[index]),
+                      child: _DestinationCard(
+                        destination: _destinations[index],
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _AnimatedEntrance(
                     delay: Duration(milliseconds: 60 * _destinations.length),
-                    child: _LogoutCard(onTap: () => _confirmLogout(context, ref)),
+                    child: _LogoutCard(
+                      onTap: () => _confirmLogout(context, ref),
+                    ),
                   ),
                 ],
               ),
@@ -116,7 +123,11 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HomeDestination {
-  const _HomeDestination({required this.icon, required this.label, required this.route});
+  const _HomeDestination({
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
 
   final IconData icon;
   final String label;
@@ -176,12 +187,17 @@ class _DestinationCard extends StatelessWidget {
               CircleAvatar(
                 radius: 26,
                 backgroundColor: colorScheme.secondaryContainer,
-                child: Icon(destination.icon, color: colorScheme.onSecondaryContainer),
+                child: Icon(
+                  destination.icon,
+                  color: colorScheme.onSecondaryContainer,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 destination.label,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],
@@ -217,10 +233,9 @@ class _LogoutCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Log out',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: colorScheme.onErrorContainer),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onErrorContainer,
+                ),
               ),
             ],
           ),

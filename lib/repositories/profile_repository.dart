@@ -19,13 +19,16 @@ class ProfileRepository {
     }
   }
 
-  Future<User> updateProfile({String? name, String? gender, String? avatarUrl}) async {
+  Future<User> updateProfile({
+    String? name,
+    String? gender,
+    String? avatarUrl,
+  }) async {
     try {
-      final response = await _dioClient.dio.put('/profile', data: {
-        'name': ?name,
-        'gender': ?gender,
-        'avatarUrl': ?avatarUrl,
-      });
+      final response = await _dioClient.dio.put(
+        '/profile',
+        data: {'name': ?name, 'gender': ?gender, 'avatarUrl': ?avatarUrl},
+      );
       return User.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);

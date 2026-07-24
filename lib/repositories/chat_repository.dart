@@ -34,14 +34,16 @@ class ChatRepository {
       if (seed % 5 == 0) continue; // some friends have no conversation yet
 
       final fromMe = seed.isEven;
-      conversations.add(Conversation(
-        friend: friend,
-        lastMessage: _sampleMessages[seed % _sampleMessages.length],
-        lastMessageAt: now.subtract(Duration(minutes: (seed % 2880) + 1)),
-        lastMessageFromMe: fromMe,
-        status: MessageStatus.values[seed % MessageStatus.values.length],
-        unreadCount: fromMe ? 0 : seed % 4,
-      ));
+      conversations.add(
+        Conversation(
+          friend: friend,
+          lastMessage: _sampleMessages[seed % _sampleMessages.length],
+          lastMessageAt: now.subtract(Duration(minutes: (seed % 2880) + 1)),
+          lastMessageFromMe: fromMe,
+          status: MessageStatus.values[seed % MessageStatus.values.length],
+          unreadCount: fromMe ? 0 : seed % 4,
+        ),
+      );
     }
 
     conversations.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));

@@ -85,10 +85,9 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authControllerProvider.notifier).verifyEmail(
-            email: email,
-            otp: _otpController.text.trim(),
-          );
+      await ref
+          .read(authControllerProvider.notifier)
+          .verifyEmail(email: email, otp: _otpController.text.trim());
       if (!mounted) return;
       AppSnackBar.showSuccess(context, 'Account verified. Please log in.');
       context.go(RouteNames.login);
@@ -121,7 +120,11 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
               validator: Validators.otp,
             ),
             const SizedBox(height: AppSpacing.lg),
-            AppButton(label: 'Verify', isLoading: _isLoading, onPressed: _submit),
+            AppButton(
+              label: 'Verify',
+              isLoading: _isLoading,
+              onPressed: _submit,
+            ),
             const SizedBox(height: AppSpacing.md),
             Align(
               alignment: Alignment.center,
