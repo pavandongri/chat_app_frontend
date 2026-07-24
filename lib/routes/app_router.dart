@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,6 +29,31 @@ const _authRoutes = {
   RouteNames.resetPassword,
 };
 
+/// One subtle fade + slight upward slide, applied to every route so page
+/// transitions are consistent app-wide rather than left to each platform's
+/// differing default (per Story 19).
+CustomTransitionPage<void> _buildPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 220),
+    reverseTransitionDuration: const Duration(milliseconds: 180),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.02),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 /// Central route table. Auth state drives navigation entirely through this
 /// `redirect` — no per-widget `if (!loggedIn) ...` checks anywhere.
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -57,62 +83,75 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: RouteNames.splash,
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const SplashScreen()),
       ),
       GoRoute(
         path: RouteNames.login,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => _buildPage(state, const LoginScreen()),
       ),
       GoRoute(
         path: RouteNames.signup,
-        builder: (context, state) => const SignupScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const SignupScreen()),
       ),
       GoRoute(
         path: RouteNames.verifyOtp,
-        builder: (context, state) =>
-            VerifyOtpScreen(email: state.uri.queryParameters['email']),
+        pageBuilder: (context, state) => _buildPage(
+          state,
+          VerifyOtpScreen(email: state.uri.queryParameters['email']),
+        ),
       ),
       GoRoute(
         path: RouteNames.forgotPassword,
-        builder: (context, state) => const ForgotPasswordScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const ForgotPasswordScreen()),
       ),
       GoRoute(
         path: RouteNames.resetPassword,
-        builder: (context, state) =>
-            ResetPasswordScreen(email: state.uri.queryParameters['email']),
+        pageBuilder: (context, state) => _buildPage(
+          state,
+          ResetPasswordScreen(email: state.uri.queryParameters['email']),
+        ),
       ),
       GoRoute(
         path: RouteNames.home,
-        builder: (context, state) => const HomeScreen(),
+        pageBuilder: (context, state) => _buildPage(state, const HomeScreen()),
       ),
       GoRoute(
         path: RouteNames.profile,
-        builder: (context, state) => const ProfileScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const ProfileScreen()),
       ),
       GoRoute(
         path: RouteNames.editProfile,
-        builder: (context, state) =>
-            EditProfileScreen(user: state.extra as User),
+        pageBuilder: (context, state) =>
+            _buildPage(state, EditProfileScreen(user: state.extra as User)),
       ),
       GoRoute(
         path: RouteNames.searchFriends,
-        builder: (context, state) => const SearchFriendsScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const SearchFriendsScreen()),
       ),
       GoRoute(
         path: RouteNames.friendRequests,
-        builder: (context, state) => const FriendRequestsScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const FriendRequestsScreen()),
       ),
       GoRoute(
         path: RouteNames.friendsList,
-        builder: (context, state) => const FriendsListScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const FriendsListScreen()),
       ),
       GoRoute(
         path: RouteNames.chatList,
-        builder: (context, state) => const ChatListScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const ChatListScreen()),
       ),
       GoRoute(
         path: RouteNames.chat,
-        builder: (context, state) => ChatScreen(friend: state.extra as Friend),
+        pageBuilder: (context, state) =>
+            _buildPage(state, ChatScreen(friend: state.extra as Friend)),
       ),
     ],
   );

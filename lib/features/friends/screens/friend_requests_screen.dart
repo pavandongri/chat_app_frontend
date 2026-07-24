@@ -10,6 +10,7 @@ import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/small_spinner.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/friend_request.dart';
 import '../../../providers/friend_requests_provider.dart';
@@ -196,11 +197,7 @@ class _IncomingRequestCard extends StatelessWidget {
             if (isPending)
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+                child: SmallSpinner(),
               )
             else ...[
               IconButton(
@@ -257,11 +254,7 @@ class _OutgoingRequestCard extends StatelessWidget {
             if (isPending)
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+                child: SmallSpinner(),
               )
             else
               TextButton(onPressed: onCancel, child: const Text('Cancel')),

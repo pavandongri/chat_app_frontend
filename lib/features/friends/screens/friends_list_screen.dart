@@ -101,7 +101,7 @@ class _FriendsListScreenState extends ConsumerState<FriendsListScreen> {
                               children: const [
                                 EmptyStateWidget(
                                   message: 'No friends match your search.',
-                                  icon: Icons.search_off_rounded,
+                                  icon: Icons.search_off,
                                 ),
                               ],
                             )
@@ -175,7 +175,7 @@ class _FriendCard extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             FilledButton.tonalIcon(
               onPressed: () => context.push(RouteNames.chat, extra: friend),
-              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+              icon: const Icon(Icons.chat_bubble_outline, size: 18),
               label: const Text('Chat'),
             ),
           ],

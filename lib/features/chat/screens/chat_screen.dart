@@ -15,6 +15,7 @@ import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/presence_indicator.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/small_spinner.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/friend.dart';
 import '../../../models/message.dart';
@@ -303,7 +304,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: chatState.messages.isEmpty
                 ? const EmptyStateWidget(
                     message: 'No messages yet — say hi!',
-                    icon: Icons.chat_bubble_outline_rounded,
+                    icon: Icons.chat_bubble_outline,
                   )
                 : ListView.builder(
                     controller: _scrollController,
@@ -318,13 +319,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           padding: EdgeInsets.symmetric(
                             vertical: AppSpacing.md,
                           ),
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
+                          child: Center(child: SmallSpinner()),
                         );
                       }
                       final message = reversedMessages[index];
@@ -405,15 +400,11 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         if (isRefreshing)
           const Padding(
             padding: EdgeInsets.all(AppSpacing.md),
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+            child: SmallSpinner(),
           )
         else
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
             onPressed: onRefresh,
           ),
@@ -550,12 +541,8 @@ class _MessageInputBar extends StatelessWidget {
                   return IconButton.filled(
                     onPressed: canSend ? onSend : null,
                     icon: isSending
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.send_rounded),
+                        ? const SmallSpinner(size: 18)
+                        : const Icon(Icons.send),
                   );
                 },
               ),

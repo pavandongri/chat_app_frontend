@@ -80,7 +80,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       return const EmptyStateWidget(
                         message:
                             'No conversations yet — start one from your friends list.',
-                        icon: Icons.chat_bubble_outline_rounded,
+                        icon: Icons.chat_bubble_outline,
                       );
                     }
 
@@ -103,7 +103,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                 EmptyStateWidget(
                                   message:
                                       'No conversations match your search.',
-                                  icon: Icons.search_off_rounded,
+                                  icon: Icons.search_off,
                                 ),
                               ],
                             )

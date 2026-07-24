@@ -10,7 +10,6 @@ class RouteNames {
 
   static const String home = '/home';
 
-  /// Destination screens are placeholders until Stories 6–9 implement them.
   static const String profile = '/profile';
   static const String editProfile = '/profile/edit';
   static const String searchFriends = '/search-friends';
@@ -18,7 +17,7 @@ class RouteNames {
   static const String friendsList = '/friends-list';
   static const String chatList = '/chats';
 
-  /// Chat Screen itself is Story 11 — this route currently resolves to a
-  /// placeholder, reached from Friends List's Chat button.
+  /// Reached from Friends List's Chat button and Chat List rows, both via
+  /// `extra: friend`.
   static const String chat = '/chat';
 }

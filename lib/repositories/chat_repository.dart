@@ -2,13 +2,13 @@ import '../models/conversation.dart';
 import '../models/message_status.dart';
 import 'friends_repository.dart';
 
-/// Mock/local for now — no backend conversations-list endpoint exists, and
-/// the only message endpoint (`GET /api/messages/:friendId`) marks messages
-/// Seen as a side effect, so it must not be called just to build a preview
-/// list. Real message data is wired up in Story 12; this synthesizes a
-/// deterministic preview per friend (stable across refreshes since it's
-/// seeded by friend id, not by `Random()`) so the UI/layout can be built
-/// and reviewed now.
+/// Permanently mock/local: the backend has no conversations-list endpoint,
+/// and its only message endpoint (`GET /api/messages/:friendId`) marks
+/// messages Seen as a side effect, so it must not be called just to build a
+/// preview list. This synthesizes a deterministic preview per friend
+/// (stable across refreshes since it's seeded by friend id, not
+/// `Random()`) layered on the real friend list — Chat Screen itself
+/// (`ChatController`) uses real message data.
 class ChatRepository {
   ChatRepository(this._friendsRepository);
 

@@ -12,6 +12,7 @@ import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/small_spinner.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../providers/search_friends_provider.dart';
 
@@ -91,7 +92,7 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                     if (results.isEmpty) {
                       return const EmptyStateWidget(
                         message: 'No users found.',
-                        icon: Icons.search_off_rounded,
+                        icon: Icons.search_off,
                       );
                     }
                     return ListView.separated(
@@ -180,11 +181,7 @@ class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (state) {
       case FriendRequestButtonState.sending:
-        return const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        );
+        return const SmallSpinner();
       case FriendRequestButtonState.sent:
         return const OutlinedButton(onPressed: null, child: Text('Requested'));
       case FriendRequestButtonState.none:

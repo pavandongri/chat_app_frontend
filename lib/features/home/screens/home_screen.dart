@@ -19,17 +19,17 @@ class HomeScreen extends ConsumerWidget {
 
   static const _destinations = [
     _HomeDestination(
-      icon: Icons.chat_bubble_outline_rounded,
+      icon: Icons.chat_bubble_outline,
       label: 'Chats',
       route: RouteNames.chatList,
     ),
     _HomeDestination(
-      icon: Icons.person_outline_rounded,
+      icon: Icons.person_outline,
       label: 'Profile',
       route: RouteNames.profile,
     ),
     _HomeDestination(
-      icon: Icons.person_search_rounded,
+      icon: Icons.person_search_outlined,
       label: 'Search Friends',
       route: RouteNames.searchFriends,
     ),
@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: Icon(
-              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
             ),
             tooltip: 'Toggle theme',
             onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
@@ -229,7 +229,7 @@ class _LogoutCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.logout_rounded, color: colorScheme.onErrorContainer),
+              Icon(Icons.logout, color: colorScheme.onErrorContainer),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Log out',

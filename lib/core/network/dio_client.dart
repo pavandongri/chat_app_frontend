@@ -4,7 +4,7 @@ import '../constants/app_constants.dart';
 import '../services/secure_storage_service.dart';
 
 /// The single shared Dio instance for the app. Feature repositories consume
-/// this via `dioProvider` and must never instantiate their own `Dio()`.
+/// this via `dioClientProvider` and must never instantiate their own `Dio()`.
 class DioClient {
   DioClient(this._secureStorageService)
     : dio = Dio(

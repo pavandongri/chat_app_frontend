@@ -59,5 +59,5 @@ story (see `../backend/ai/implementation-plan.md`) is already implemented.
 - [x] 16 — Refresh Mechanism
 - [x] 17 — Loading, Empty & Error States
 - [x] 18 — Responsive Design
-- [ ] 19 — App Polish
-- [ ] 20 — Production Cleanup
+- [x] 19 — App Polish
+- [x] 20 — Production Cleanup
