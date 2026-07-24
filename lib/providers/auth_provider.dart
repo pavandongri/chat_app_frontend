@@ -83,6 +83,15 @@ class AuthController extends AsyncNotifier<User?> {
         );
   }
 
+  /// Pushes an updated [User] (e.g. from a Profile fetch/edit) into the
+  /// session so every screen watching `authControllerProvider` (Home's
+  /// header, etc.) reflects it immediately — no separate "current user"
+  /// source of truth.
+  Future<void> setSessionUser(User user) async {
+    state = AsyncValue.data(user);
+    await ref.read(sharedPreferencesServiceProvider).setCachedUserJson(jsonEncode(user.toJson()));
+  }
+
   Future<void> logout() async {
     try {
       // Best-effort: the JWT is stateless, so a failed/offline logout call

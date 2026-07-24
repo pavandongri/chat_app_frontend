@@ -15,6 +15,16 @@ class ResponseParser {
     return null;
   }
 
+  /// Unwraps a `data` payload that is a JSON array (e.g. friend/search
+  /// lists) rather than an object.
+  static List<Map<String, dynamic>> list(Response response) {
+    final body = response.data;
+    if (body is Map<String, dynamic> && body['data'] is List) {
+      return (body['data'] as List).cast<Map<String, dynamic>>();
+    }
+    return const [];
+  }
+
   static AppException mapError(DioException error) {
     final body = error.response?.data;
     final message = (body is Map && body['message'] is String)

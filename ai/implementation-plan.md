@@ -44,13 +44,13 @@ story (see `../backend/ai/implementation-plan.md`) is already implemented.
 - [x] 1 — Flutter Project Foundation
 - [x] 2 — Theme System
 - [x] 3 — Authentication UI
-- [ ] 4 — Authentication API Integration
-- [ ] 5 — Home Screen
-- [ ] 6 — Profile
-- [ ] 7 — Search Friends
-- [ ] 8 — Friend Requests
-- [ ] 9 — Friends List
-- [ ] 10 — Chat List
+- [x] 4 — Authentication API Integration
+- [x] 5 — Home Screen
+- [x] 6 — Profile
+- [x] 7 — Search Friends
+- [x] 8 — Friend Requests
+- [x] 9 — Friends List
+- [x] 10 — Chat List
 - [ ] 11 — Chat Screen
 - [ ] 12 — Message API Integration
 - [ ] 13 — Edit Message

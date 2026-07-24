@@ -1,6 +1,6 @@
-/// Shared form validation rules for the auth screens (Login, Signup, Verify
-/// OTP, Forgot/Reset Password). Centralized so validation stays consistent
-/// across all six screens instead of being redefined per form.
+/// Shared form validation rules used across auth and profile screens.
+/// Centralized so validation stays consistent instead of being redefined
+/// per form.
 class Validators {
   Validators._();
 
@@ -65,6 +65,15 @@ class Validators {
       }
       return null;
     };
+  }
+
+  static String? avatarUrl(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final uri = Uri.tryParse(value.trim());
+    if (uri == null || !uri.isAbsolute || !(uri.scheme == 'http' || uri.scheme == 'https')) {
+      return 'Enter a valid URL';
+    }
+    return null;
   }
 
   static String? otp(String? value) {

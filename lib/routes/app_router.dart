@@ -2,14 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/widgets/app_bar.dart';
+import '../core/widgets/empty_state_widget.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/reset_password_screen.dart';
 import '../features/auth/screens/signup_screen.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/verify_otp_screen.dart';
+import '../features/chat/screens/chat_list_screen.dart';
+import '../features/friends/screens/friend_requests_screen.dart';
+import '../features/friends/screens/friends_list_screen.dart';
+import '../features/friends/screens/search_friends_screen.dart';
+import '../features/home/screens/home_screen.dart';
+import '../features/profile/screens/edit_profile_screen.dart';
+import '../features/profile/screens/profile_screen.dart';
+import '../models/friend.dart';
+import '../models/user.dart';
 import '../providers/auth_provider.dart';
-import '../providers/theme_provider.dart';
 import 'route_names.dart';
 
 const _authRoutes = {
@@ -71,38 +81,54 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RouteNames.home,
-        builder: (context, state) => const _PlaceholderHomeScreen(),
+        builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.editProfile,
+        builder: (context, state) => EditProfileScreen(user: state.extra as User),
+      ),
+      GoRoute(
+        path: RouteNames.searchFriends,
+        builder: (context, state) => const SearchFriendsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.friendRequests,
+        builder: (context, state) => const FriendRequestsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.friendsList,
+        builder: (context, state) => const FriendsListScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.chatList,
+        builder: (context, state) => const ChatListScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.chat,
+        builder: (context, state) => _ComingSoonScreen(title: (state.extra as Friend?)?.name ?? 'Chat'),
       ),
     ],
   );
 });
 
-class _PlaceholderHomeScreen extends ConsumerWidget {
-  const _PlaceholderHomeScreen();
+/// Stand-in destination for Story 11 (Chat Screen) until it's built.
+class _ComingSoonScreen extends StatelessWidget {
+  const _ComingSoonScreen({required this.title});
+
+  final String title;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-    final isDark = themeMode == ThemeMode.dark;
-
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chat App'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
-            tooltip: 'Toggle theme',
-            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Log out',
-            onPressed: () => ref.read(authControllerProvider.notifier).logout(),
-          ),
-        ],
+      appBar: CustomAppBar(title: title),
+      body: EmptyStateWidget(
+        message: '$title is coming soon.',
+        icon: Icons.construction_outlined,
       ),
-      body: const Center(child: Text('Project foundation ready.')),
     );
   }
 }

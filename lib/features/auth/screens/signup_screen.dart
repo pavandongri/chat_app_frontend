@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/gender_options.dart';
 import '../../../core/network/app_exception.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
@@ -20,8 +21,6 @@ class SignupScreen extends ConsumerStatefulWidget {
 }
 
 class _SignupScreenState extends ConsumerState<SignupScreen> {
-  static const _genderOptions = ['female', 'male', 'other'];
-
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _nameController = TextEditingController();
@@ -94,7 +93,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             DropdownButtonFormField<String>(
               initialValue: _gender,
               decoration: const InputDecoration(labelText: 'Gender'),
-              items: _genderOptions
+              items: kGenderOptions
                   .map((g) => DropdownMenuItem(value: g, child: Text(g[0].toUpperCase() + g.substring(1))))
                   .toList(),
               onChanged: (value) => setState(() => _gender = value),

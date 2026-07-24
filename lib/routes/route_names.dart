@@ -8,7 +8,17 @@ class RouteNames {
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
 
-  /// Placeholder post-login landing route. Replaced by the real Home
-  /// Screen in Story 5.
   static const String home = '/home';
+
+  /// Destination screens are placeholders until Stories 6–9 implement them.
+  static const String profile = '/profile';
+  static const String editProfile = '/profile/edit';
+  static const String searchFriends = '/search-friends';
+  static const String friendRequests = '/friend-requests';
+  static const String friendsList = '/friends-list';
+  static const String chatList = '/chats';
+
+  /// Chat Screen itself is Story 11 — this route currently resolves to a
+  /// placeholder, reached from Friends List's Chat button.
+  static const String chat = '/chat';
 }

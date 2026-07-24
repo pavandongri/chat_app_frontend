@@ -1,0 +1,211 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/app_bar.dart';
+import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/empty_state_widget.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/user_avatar.dart';
+import '../../../models/conversation.dart';
+import '../../../providers/chat_provider.dart';
+import '../../../routes/route_names.dart';
+
+class ChatListScreen extends ConsumerStatefulWidget {
+  const ChatListScreen({super.key});
+
+  @override
+  ConsumerState<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends ConsumerState<ChatListScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationsAsync = ref.watch(chatListControllerProvider);
+
+    return Scaffold(
+      appBar: const CustomAppBar(title: 'Chats'),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+              child: AppTextField(
+                controller: _searchController,
+                label: 'Search conversations',
+                suffixIcon: const Icon(Icons.search),
+                onChanged: (value) => setState(() => _query = value),
+              ),
+            ),
+            Expanded(
+              child: conversationsAsync.when(
+                loading: () => const LoadingWidget(message: 'Loading chats…'),
+                error: (error, _) => AppErrorWidget(
+                  message: error.toString(),
+                  onRetry: () => ref.invalidate(chatListControllerProvider),
+                ),
+                data: (conversations) {
+                  if (conversations.isEmpty) {
+                    return const EmptyStateWidget(
+                      message: 'No conversations yet — start one from your friends list.',
+                      icon: Icons.chat_bubble_outline_rounded,
+                    );
+                  }
+
+                  final filtered = _query.trim().isEmpty
+                      ? conversations
+                      : conversations
+                          .where((c) => c.friend.name.toLowerCase().contains(_query.trim().toLowerCase()))
+                          .toList();
+
+                  return RefreshIndicator(
+                    onRefresh: () => ref.refresh(chatListControllerProvider.future),
+                    child: filtered.isEmpty
+                        ? ListView(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            children: const [
+                              EmptyStateWidget(
+                                message: 'No conversations match your search.',
+                                icon: Icons.search_off_rounded,
+                              ),
+                            ],
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            itemCount: filtered.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                            itemBuilder: (context, index) => _ConversationCard(conversation: filtered[index]),
+                          ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ConversationCard extends StatelessWidget {
+  const _ConversationCard({required this.conversation});
+
+  final Conversation conversation;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final friend = conversation.friend;
+    final hasUnread = conversation.unreadCount > 0;
+
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push(RouteNames.chat, extra: friend),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          child: Row(
+            children: [
+              UserAvatar(name: friend.name, avatarUrl: friend.avatarUrl, radius: 26),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      friend.name,
+                      style: textTheme.titleMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        if (conversation.lastMessageFromMe) ...[
+                          Icon(_statusIcon(conversation.status), size: 16, color: _statusColor(conversation.status, colorScheme)),
+                          const SizedBox(width: 4),
+                        ],
+                        Expanded(
+                          child: Text(
+                            conversation.lastMessage,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: hasUnread ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                              fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    _formatTimestamp(conversation.lastMessageAt),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: hasUnread ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                      fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (hasUnread)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${conversation.unreadCount}',
+                        style: textTheme.labelMedium?.copyWith(color: colorScheme.onPrimary),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _statusIcon(MessageDeliveryStatus status) {
+    switch (status) {
+      case MessageDeliveryStatus.sent:
+        return Icons.check;
+      case MessageDeliveryStatus.delivered:
+        return Icons.done_all;
+      case MessageDeliveryStatus.seen:
+        return Icons.done_all;
+    }
+  }
+
+  Color _statusColor(MessageDeliveryStatus status, ColorScheme colorScheme) {
+    return status == MessageDeliveryStatus.seen ? colorScheme.primary : colorScheme.onSurfaceVariant;
+  }
+
+  String _formatTimestamp(DateTime time) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inMinutes < 1) return 'now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    if (diff.inDays < 7) return '${diff.inDays}d';
+    return '${time.month}/${time.day}';
+  }
+}

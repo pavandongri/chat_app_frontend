@@ -10,6 +10,7 @@ class AppTextField extends StatelessWidget {
     this.keyboardType,
     this.validator,
     this.suffixIcon,
+    this.onChanged,
   });
 
   final TextEditingController? controller;
@@ -19,6 +20,7 @@ class AppTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final Widget? suffixIcon;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class AppTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       validator: validator,
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

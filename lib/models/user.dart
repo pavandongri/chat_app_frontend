@@ -20,6 +20,9 @@ class User {
   final String? avatarUrl;
   final bool isEmailVerified;
 
+  /// Note: unlike most of the backend's JSON (`snake_case`), `/api/profile`
+  /// returns these two fields as camelCase (`avatarUrl`, `isEmailVerified`) —
+  /// match the wire format here, not the general convention.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
@@ -27,8 +30,8 @@ class User {
       email: json['email'] as String,
       name: json['name'] as String?,
       gender: json['gender'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
-      isEmailVerified: json['is_email_verified'] as bool? ?? false,
+      avatarUrl: json['avatarUrl'] as String?,
+      isEmailVerified: json['isEmailVerified'] as bool? ?? false,
     );
   }
 
@@ -38,8 +41,8 @@ class User {
         'email': email,
         'name': name,
         'gender': gender,
-        'avatar_url': avatarUrl,
-        'is_email_verified': isEmailVerified,
+        'avatarUrl': avatarUrl,
+        'isEmailVerified': isEmailVerified,
       };
 
   User copyWith({bool? isEmailVerified}) => User(
