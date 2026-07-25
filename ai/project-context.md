@@ -9,7 +9,17 @@ work on this frontend. Read this first, then the relevant story in
 The Flutter client for a production-grade 1:1 chat application. It talks to
 the backend described in `../backend/ai/project-context.md`. Phase 1 (this
 roadmap) covers auth, friends, and text messaging with **manual refresh** —
-no WebSockets, no real-time push, no background sockets.
+no WebSockets, no real-time push, no background sockets. Phase 1 is
+complete (Stories 1–20).
+
+Phase 2 is a **UI/UX redesign** layered on top of the completed Phase 1
+functionality — see [ui-ux-redesign.md](ui-ux-redesign.md) for the source
+brief and Stories 21–31 in `ai/implementation-plan.md` for the ordered
+breakdown. Phase 2 introduces a WhatsApp-inspired premium visual language
+(centralized theme system, glassmorphism/soft shadows/gradients, a 4-tab
+bottom navigation home shell) but is **visual/UX only** — it must not alter
+any domain rule below, any backend contract, or anything under "What NOT to
+Build."
 
 ## Tech Stack
 
@@ -74,6 +84,7 @@ These mirror the backend's domain rules — the UI must not contradict them:
 
 ## Reference Docs
 
+- [UI/UX Redesign Brief (Phase 2)](ui-ux-redesign.md)
 - [Architecture](../docs/architecture.md)
 - [Networking](../docs/networking.md)
 - [Design System](../docs/design-system.md)

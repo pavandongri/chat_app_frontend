@@ -28,6 +28,38 @@ story (see `../backend/ai/implementation-plan.md`) is already implemented.
 | 19 | App Polish                       | [019-app-polish.md](stories/019-app-polish.md)                         | 18         |
 | 20 | Production Cleanup              | [020-production-cleanup.md](stories/020-production-cleanup.md)         | all        |
 
+## Implementation Plan — Phase 2 (UI/UX Redesign)
+
+Phase 1 (above) is complete. Phase 2 is a visual/UX redesign layered on top
+of it — see [ui-ux-redesign.md](ui-ux-redesign.md) for the source brief.
+This phase does **not** change domain rules, backend contracts, or any item
+under "What NOT to Build" in `project-context.md` — it is UI/UX only.
+Work top to bottom, respecting dependencies.
+
+| #  | Story                                    | File                                                                             | Depends On |
+| -- | ------------------------------------------ | ----------------------------------------------------------------------------------- | ---------- |
+| 21 | Theme System v2 (WhatsApp Palette)         | [021-theme-system-v2.md](stories/021-theme-system-v2.md)                             | 1–20       |
+| 22 | Premium Reusable Component Library         | [022-premium-component-library.md](stories/022-premium-component-library.md)         | 21         |
+| 23 | Home Shell: Bottom Navigation Redesign     | [023-bottom-nav-shell.md](stories/023-bottom-nav-shell.md)                           | 21, 22     |
+| 24 | Chats Tab Redesign                         | [024-chats-tab-redesign.md](stories/024-chats-tab-redesign.md)                       | 23         |
+| 25 | Friend Requests Tab Redesign               | [025-friend-requests-tab-redesign.md](stories/025-friend-requests-tab-redesign.md)   | 23         |
+| 26 | Friend Search Tab Redesign                 | [026-friend-search-tab-redesign.md](stories/026-friend-search-tab-redesign.md)       | 23         |
+| 27 | Profile Tab Redesign                       | [027-profile-tab-redesign.md](stories/027-profile-tab-redesign.md)                   | 23         |
+| 28 | Authentication Screens Premium Redesign    | [028-auth-screens-premium-redesign.md](stories/028-auth-screens-premium-redesign.md) | 21, 22     |
+| 29 | Dialogs & Feedback Components Redesign     | [029-dialogs-feedback-redesign.md](stories/029-dialogs-feedback-redesign.md)         | 22         |
+| 30 | Micro-Interactions & Transition Polish     | [030-micro-interactions-polish.md](stories/030-micro-interactions-polish.md)         | 24–29      |
+| 31 | Phase 2 Consistency & QA Pass              | [031-phase2-consistency-qa.md](stories/031-phase2-consistency-qa.md)                 | 21–30      |
+
+Notes on ordering:
+
+- 24–27 (the four bottom-nav tabs) all depend only on 23 and are otherwise
+  independent of each other — they may be done in any relative order, but
+  are listed in the same order as the tabs themselves for clarity.
+- 28 (auth screens) only depends on the theme/component work (21, 22), not
+  on the home shell — it can be done in parallel with 23–27 if desired,
+  though the default is to work top to bottom.
+- 30 and 31 must come last — they polish and audit everything above them.
+
 ## Workflow
 
 1. Pick the next unstarted story (top to bottom, respecting dependencies).
@@ -61,3 +93,17 @@ story (see `../backend/ai/implementation-plan.md`) is already implemented.
 - [x] 18 — Responsive Design
 - [x] 19 — App Polish
 - [x] 20 — Production Cleanup
+
+### Phase 2 (UI/UX Redesign)
+
+- [ ] 21 — Theme System v2 (WhatsApp Palette)
+- [ ] 22 — Premium Reusable Component Library
+- [ ] 23 — Home Shell: Bottom Navigation Redesign
+- [ ] 24 — Chats Tab Redesign
+- [ ] 25 — Friend Requests Tab Redesign
+- [ ] 26 — Friend Search Tab Redesign
+- [ ] 27 — Profile Tab Redesign
+- [ ] 28 — Authentication Screens Premium Redesign
+- [ ] 29 — Dialogs & Feedback Components Redesign
+- [ ] 30 — Micro-Interactions & Transition Polish
+- [ ] 31 — Phase 2 Consistency & QA Pass
