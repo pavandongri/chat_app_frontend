@@ -28,6 +28,36 @@ class ChatListController extends AutoDisposeAsyncNotifier<List<Conversation>> {
         .getConversations();
     state = AsyncValue.data(conversations);
   }
+
+  /// Applies what `ChatController` already learned by loading this
+  /// conversation — its true latest message and that the friend's
+  /// messages are now seen — without a network round trip.
+  /// `GET /messages/:friendId` (which loading a conversation just called)
+  /// marks them seen server-side as a side effect, so this is purely
+  /// catching the already-loaded local state up to that fact, not
+  /// asserting something new. A no-op if this friend has no existing row
+  /// (nothing to patch) or the list hasn't loaded yet.
+  void markConversationRead({
+    required String friendId,
+    required Message lastMessage,
+  }) {
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    final index = current.indexWhere((c) => c.friend.id == friendId);
+    if (index == -1) return;
+
+    final updated = List<Conversation>.of(current);
+    updated[index] = Conversation(
+      friend: updated[index].friend,
+      lastMessage: lastMessage,
+      unreadCount: 0,
+    );
+    updated.sort(
+      (a, b) => b.lastMessage.createdAt.compareTo(a.lastMessage.createdAt),
+    );
+    state = AsyncValue.data(updated);
+  }
 }
 
 final chatListControllerProvider =
@@ -101,15 +131,50 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
     }
 
     final lastPage = (probe.total / _pageSize).ceil();
-    final result = await repo.getConversation(
+    final lastPageResult = await repo.getConversation(
       _friendId,
       page: lastPage,
       limit: _pageSize,
     );
+
+    List<Message> messages;
+    int oldestLoadedPage;
+    bool hasMore;
+
+    // The last page is a short remainder whenever `total` isn't an exact
+    // multiple of `_pageSize` (e.g. 151 total / 50 per page -> page 4 has
+    // just 1 message) — pull in the previous page too so opening a
+    // conversation shows a full `_pageSize` window, not a near-empty one.
+    if (lastPageResult.items.length < _pageSize && lastPage > 1) {
+      final previousPage = lastPage - 1;
+      final previousPageResult = await repo.getConversation(
+        _friendId,
+        page: previousPage,
+        limit: _pageSize,
+      );
+      messages = [...previousPageResult.items, ...lastPageResult.items];
+      oldestLoadedPage = previousPage;
+      hasMore = previousPage > 1;
+    } else {
+      messages = lastPageResult.items;
+      oldestLoadedPage = lastPage;
+      hasMore = lastPage > 1;
+    }
+
+    // This fetch is exactly what just marked the friend's messages seen
+    // server-side — reflect that in the Chat List immediately (right as
+    // the conversation opens, not when the user later leaves it), reusing
+    // the messages already fetched above instead of another API call.
+    if (messages.isNotEmpty) {
+      ref
+          .read(chatListControllerProvider.notifier)
+          .markConversationRead(friendId: _friendId, lastMessage: messages.last);
+    }
+
     return ChatState(
-      messages: result.items,
-      oldestLoadedPage: lastPage,
-      hasMore: lastPage > 1,
+      messages: messages,
+      oldestLoadedPage: oldestLoadedPage,
+      hasMore: hasMore,
     );
   }
 
@@ -159,6 +224,9 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
       state = AsyncValue.data(
         latest.copyWith(messages: [...latest.messages, sent], isSending: false),
       );
+      ref
+          .read(chatListControllerProvider.notifier)
+          .markConversationRead(friendId: _friendId, lastMessage: sent);
     } catch (e) {
       final latest = state.valueOrNull ?? current;
       state = AsyncValue.data(latest.copyWith(isSending: false));
