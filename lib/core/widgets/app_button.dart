@@ -108,27 +108,37 @@ class _GradientButton extends StatelessWidget {
         opacity: enabled ? 1 : 0.5,
         child: ClipRRect(
           borderRadius: AppRadius.mdRadius,
-          child: Ink(
+          // A plain `Container` (not `Ink`) paints the gradient itself,
+          // right here — `Ink` instead draws via the nearest ancestor
+          // `Material`, which (through a `GlassCard`'s `BackdropFilter`)
+          // ends up rendered as "background" content that gets blurred and
+          // dimmed by the glass panel's own frosting, making the button
+          // look washed out/invisible. The local transparent `Material`
+          // below still gives `InkWell` a proper ripple surface.
+          child: Container(
             decoration: const BoxDecoration(gradient: AppGradients.primary),
-            child: InkWell(
-              onTap: enabled ? onPressed : null,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                child: Center(
-                  child: isLoading
-                      ? const SmallSpinner(
-                          size: 20,
-                          strokeWidth: 2,
-                          color: AppColors.onGradient,
-                        )
-                      : Text(
-                          label,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(color: AppColors.onGradient),
-                        ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: enabled ? onPressed : null,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Center(
+                    child: isLoading
+                        ? const SmallSpinner(
+                            size: 20,
+                            strokeWidth: 2,
+                            color: AppColors.onGradient,
+                          )
+                        : Text(
+                            label,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(color: AppColors.onGradient),
+                          ),
+                  ),
                 ),
               ),
             ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../core/network/dio_client.dart';
@@ -28,6 +30,24 @@ class ProfileRepository {
       final response = await _dioClient.dio.put(
         '/profile',
         data: {'name': ?name, 'gender': ?gender, 'avatarUrl': ?avatarUrl},
+      );
+      return User.fromJson(ResponseParser.data(response)!);
+    } on DioException catch (e) {
+      throw ResponseParser.mapError(e);
+    }
+  }
+
+  Future<User> uploadAvatar(File imageFile) async {
+    try {
+      final formData = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: imageFile.uri.pathSegments.last,
+        ),
+      });
+      final response = await _dioClient.dio.post(
+        '/profile/avatar',
+        data: formData,
       );
       return User.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {

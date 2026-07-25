@@ -11,6 +11,8 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.suffixIcon,
     this.onChanged,
+    this.autofocus = false,
+    this.filled,
   });
 
   final TextEditingController? controller;
@@ -21,6 +23,13 @@ class AppTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final Widget? suffixIcon;
   final ValueChanged<String>? onChanged;
+  final bool autofocus;
+
+  /// Overrides the themed opaque fill — pass `false` so a glass/blurred
+  /// container behind the field (e.g. `GlassCard`) shows through instead
+  /// of being hidden under the default solid fill. Leave unset to keep the
+  /// standard themed input.
+  final bool? filled;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +39,13 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       validator: validator,
       onChanged: onChanged,
+      autofocus: autofocus,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         suffixIcon: suffixIcon,
+        filled: filled,
+        fillColor: filled == false ? Colors.transparent : null,
       ),
     );
   }

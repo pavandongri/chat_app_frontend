@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Read(//home/dongri/Desktop/chat_app/chat_backend/**)"
+    ]
+  }
+}

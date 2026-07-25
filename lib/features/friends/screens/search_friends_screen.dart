@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_exception.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
 import '../../../core/widgets/app_button.dart';
@@ -12,6 +13,7 @@ import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/small_spinner.dart';
@@ -67,13 +69,23 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: AppTextField(
-                  controller: _searchController,
-                  label: 'Search by name',
-                  hint: 'e.g. Jane Doe',
-                  suffixIcon: const Icon(Icons.search),
-                  onChanged: _onChanged,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                ),
+                child: GlassCard(
+                  padding: EdgeInsets.zero,
+                  borderRadius: AppRadius.mdRadius,
+                  child: AppTextField(
+                    controller: _searchController,
+                    label: 'Search by name',
+                    hint: 'e.g. Jane Doe',
+                    suffixIcon: const Icon(Icons.search),
+                    filled: false,
+                    onChanged: _onChanged,
+                  ),
                 ),
               ),
               Expanded(
@@ -100,9 +112,9 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                     }
                     return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
+                        AppSpacing.md,
                         0,
-                        AppSpacing.lg,
+                        AppSpacing.md,
                         AppSpacing.lg,
                       ),
                       itemCount: results.length,
@@ -140,7 +152,8 @@ class _SearchResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = result.user;
 
-    return Card(
+    return GlassCard(
+      padding: EdgeInsets.zero,
       child: AppListTile(
         leading: UserAvatar(
           name: user.name,

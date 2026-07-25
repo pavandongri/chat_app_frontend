@@ -9,6 +9,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/small_spinner.dart';
@@ -57,7 +58,12 @@ class FriendRequestsScreen extends ConsumerWidget {
               return RefreshIndicator(
                 onRefresh: () => _handle(context, notifier.refresh),
                 child: ListView(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                  ),
                   children: [
                     _SectionHeader(
                       title: 'Incoming',
@@ -187,9 +193,9 @@ class _IncomingRequestCard extends StatelessWidget {
     final user = request.user;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Padding(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: GlassCard(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,9 +267,9 @@ class _OutgoingRequestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = request.user;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Padding(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: GlassCard(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [

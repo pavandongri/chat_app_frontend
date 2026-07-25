@@ -10,6 +10,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_dialog.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/chat_background.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/max_width_box.dart';
@@ -272,16 +273,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         isRefreshing: _isRefreshing,
         onRefresh: _refresh,
       ),
-      body: SafeArea(
-        child: chatAsync.when(
-          loading: () => const SkeletonChatBubbles(),
-          error: (error, _) => AppErrorWidget(
-            message: error.toString(),
-            onRetry: () =>
-                ref.invalidate(chatControllerProvider(widget.friend.id)),
+      body: Stack(
+        children: [
+          const Positioned.fill(child: ChatBackgroundPattern()),
+          SafeArea(
+            child: chatAsync.when(
+              loading: () => const SkeletonChatBubbles(),
+              error: (error, _) => AppErrorWidget(
+                message: error.toString(),
+                onRetry: () =>
+                    ref.invalidate(chatControllerProvider(widget.friend.id)),
+              ),
+              data: _buildConversation,
+            ),
           ),
-          data: _buildConversation,
-        ),
+        ],
       ),
     );
   }

@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_gradients.dart';
-import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/brand_badge.dart';
 import '../../../models/user.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../routes/route_names.dart';
@@ -74,19 +73,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: AppShadows.softLarge(colorScheme),
-                    ),
-                    child: const Icon(
-                      Icons.chat_bubble_rounded,
-                      size: 56,
-                      color: AppColors.onGradient,
-                    ),
-                  ),
+                  const BrandBadge(),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     'Chat App',

@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/app_exception.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/presence_indicator.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -55,16 +57,21 @@ class _FriendsListScreenState extends ConsumerState<FriendsListScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
                   AppSpacing.lg,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
+                  AppSpacing.md,
                   0,
                 ),
-                child: AppTextField(
-                  controller: _searchController,
-                  label: 'Search friends',
-                  suffixIcon: const Icon(Icons.search),
-                  onChanged: (value) => setState(() => _query = value),
+                child: GlassCard(
+                  padding: EdgeInsets.zero,
+                  borderRadius: AppRadius.mdRadius,
+                  child: AppTextField(
+                    controller: _searchController,
+                    label: 'Search friends',
+                    suffixIcon: const Icon(Icons.search),
+                    filled: false,
+                    onChanged: (value) => setState(() => _query = value),
+                  ),
                 ),
               ),
               Expanded(
@@ -106,7 +113,10 @@ class _FriendsListScreenState extends ConsumerState<FriendsListScreen> {
                               ],
                             )
                           : ListView.separated(
-                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.sm,
+                              ),
                               itemCount: filtered.length,
                               separatorBuilder: (context, index) =>
                                   const SizedBox(height: AppSpacing.sm),
@@ -132,54 +142,52 @@ class _FriendCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        child: Row(
-          children: [
-            Stack(
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Stack(
+            children: [
+              UserAvatar(
+                name: friend.name,
+                avatarUrl: friend.avatarUrl,
+                radius: 24,
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: PresenceDot(isOnline: friend.isOnline),
+              ),
+            ],
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                UserAvatar(
-                  name: friend.name,
-                  avatarUrl: friend.avatarUrl,
-                  radius: 24,
+                Text(
+                  friend.name,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: PresenceDot(isOnline: friend.isOnline),
+                PresenceStatusText(
+                  isOnline: friend.isOnline,
+                  lastSeen: friend.lastSeen,
                 ),
               ],
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    friend.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  PresenceStatusText(
-                    isOnline: friend.isOnline,
-                    lastSeen: friend.lastSeen,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            FilledButton.tonalIcon(
-              onPressed: () => context.push(RouteNames.chat, extra: friend),
-              icon: const Icon(Icons.chat_bubble_outline, size: 18),
-              label: const Text('Chat'),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          FilledButton.tonalIcon(
+            onPressed: () => context.push(RouteNames.chat, extra: friend),
+            icon: const Icon(Icons.chat_bubble_outline, size: 18),
+            label: const Text('Chat'),
+          ),
+        ],
       ),
     );
   }

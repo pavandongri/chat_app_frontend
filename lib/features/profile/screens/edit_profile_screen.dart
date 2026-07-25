@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +12,7 @@ import '../../../core/widgets/app_bar.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
-import '../../../core/widgets/user_avatar.dart';
+import '../../../core/widgets/editable_avatar.dart';
 import '../../../models/user.dart';
 import '../../../providers/profile_provider.dart';
 
@@ -26,26 +28,39 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
-  late final TextEditingController _avatarUrlController;
   late String? _gender;
+  late String? _avatarUrl;
 
   bool _isSaving = false;
+  bool _isUploadingAvatar = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.user.name ?? '');
-    _avatarUrlController = TextEditingController(
-      text: widget.user.avatarUrl ?? '',
-    );
     _gender = widget.user.gender;
+    _avatarUrl = widget.user.avatarUrl;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _avatarUrlController.dispose();
     super.dispose();
+  }
+
+  Future<void> _uploadAvatar(File file) async {
+    setState(() => _isUploadingAvatar = true);
+    try {
+      await ref.read(profileControllerProvider.notifier).uploadAvatar(file);
+      if (!mounted) return;
+      setState(() {
+        _avatarUrl = ref.read(profileControllerProvider).valueOrNull?.avatarUrl;
+      });
+    } on AppException catch (e) {
+      if (mounted) AppSnackBar.showError(context, e.message);
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
+    }
   }
 
   Future<void> _submit() async {
@@ -53,14 +68,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     setState(() => _isSaving = true);
     try {
-      final avatarUrl = _avatarUrlController.text.trim();
       await ref
           .read(profileControllerProvider.notifier)
-          .updateProfile(
-            name: _nameController.text.trim(),
-            gender: _gender,
-            avatarUrl: avatarUrl.isEmpty ? null : avatarUrl,
-          );
+          .updateProfile(name: _nameController.text.trim(), gender: _gender);
       if (!mounted) return;
       AppSnackBar.showSuccess(context, 'Profile updated.');
       context.pop();
@@ -89,15 +99,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   children: [
                     Center(
                       child: ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: _avatarUrlController,
-                        builder: (context, value, _) => UserAvatar(
-                          name: _nameController.text.trim().isEmpty
+                        valueListenable: _nameController,
+                        builder: (context, value, _) => EditableAvatar(
+                          name: value.text.trim().isEmpty
                               ? widget.user.username
-                              : _nameController.text.trim(),
-                          avatarUrl: value.text.trim().isEmpty
-                              ? null
                               : value.text.trim(),
+                          avatarUrl: _avatarUrl,
                           radius: 48,
+                          isUploading: _isUploadingAvatar,
+                          onPickImage: _uploadAvatar,
                         ),
                       ),
                     ),
@@ -121,19 +131,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           .toList(),
                       onChanged: (value) => setState(() => _gender = value),
                       validator: Validators.gender,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    AppTextField(
-                      controller: _avatarUrlController,
-                      label: 'Avatar URL',
-                      hint: 'https://example.com/avatar.png',
-                      keyboardType: TextInputType.url,
-                      validator: Validators.avatarUrl,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Leave blank to keep your current avatar.',
-                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     AppButton(

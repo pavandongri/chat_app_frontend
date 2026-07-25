@@ -68,17 +68,6 @@ class Validators {
     };
   }
 
-  static String? avatarUrl(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    final uri = Uri.tryParse(value.trim());
-    if (uri == null ||
-        !uri.isAbsolute ||
-        !(uri.scheme == 'http' || uri.scheme == 'https')) {
-      return 'Enter a valid URL';
-    }
-    return null;
-  }
-
   static String? otp(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Enter the code sent to your email';

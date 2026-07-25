@@ -14,16 +14,19 @@ class AppGradients {
     colors: [AppColors.tealDeep, AppColors.accentGreen],
   );
 
-  /// Subtle full-screen background wash for auth/hero screens.
-  /// Brightness-aware so it stays gentle in both light and dark theme.
+  /// Full-screen background wash for auth/hero screens. Both ends carry a
+  /// visible tint (rather than fading to a flat `colorScheme.surface`) so
+  /// the gradient reads as a gradient all the way to the bottom edge of
+  /// the screen, not just near the top. Brightness-aware so it stays
+  /// gentle in both light and dark theme.
   static LinearGradient background(ColorScheme colorScheme) {
     final isDark = colorScheme.brightness == Brightness.dark;
     return LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        colorScheme.primary.withValues(alpha: isDark ? 0.20 : 0.10),
-        colorScheme.surface,
+        colorScheme.primary.withValues(alpha: isDark ? 0.30 : 0.18),
+        colorScheme.secondary.withValues(alpha: isDark ? 0.22 : 0.12),
       ],
     );
   }

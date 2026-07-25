@@ -78,6 +78,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return AuthScaffold(
       title: 'Create your account',
       subtitle: 'Sign up to start chatting with friends.',
+      showLogo: true,
       child: Form(
         key: _formKey,
         child: Column(

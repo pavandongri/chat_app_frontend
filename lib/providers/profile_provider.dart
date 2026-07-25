@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/user.dart';
@@ -28,6 +30,14 @@ class ProfileController extends AutoDisposeAsyncNotifier<User> {
     final updated = await ref
         .read(profileRepositoryProvider)
         .updateProfile(name: name, gender: gender, avatarUrl: avatarUrl);
+    state = AsyncValue.data(updated);
+    await ref.read(authControllerProvider.notifier).setSessionUser(updated);
+  }
+
+  Future<void> uploadAvatar(File imageFile) async {
+    final updated = await ref
+        .read(profileRepositoryProvider)
+        .uploadAvatar(imageFile);
     state = AsyncValue.data(updated);
     await ref.read(authControllerProvider.notifier).setSessionUser(updated);
   }

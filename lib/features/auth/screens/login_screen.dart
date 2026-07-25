@@ -61,6 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       title: 'Welcome back',
       subtitle: 'Log in to keep chatting with your friends.',
       showBackButton: false,
+      showLogo: true,
       child: Form(
         key: _formKey,
         child: Column(

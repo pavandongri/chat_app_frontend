@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/app_exception.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/app_bar.dart';
 import '../../../core/widgets/app_list_tile.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/staggered_entrance.dart';
@@ -30,11 +31,22 @@ class ChatListScreen extends ConsumerStatefulWidget {
 class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   final _searchController = TextEditingController();
   String _query = '';
+  bool _searchVisible = false;
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _searchVisible = !_searchVisible;
+      if (!_searchVisible) {
+        _searchController.clear();
+        _query = '';
+      }
+    });
   }
 
   Future<void> _refresh() async {
@@ -50,8 +62,26 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Widget build(BuildContext context) {
     final conversationsAsync = ref.watch(chatListControllerProvider);
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Chats'),
+      appBar: AppBar(
+        titleSpacing: AppSpacing.lg,
+        title: Text(
+          'Chat App',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(_searchVisible ? Icons.close : Icons.search),
+            tooltip: _searchVisible ? 'Close search' : 'Search conversations',
+            onPressed: _toggleSearch,
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(RouteNames.friendsList),
         tooltip: 'Start a new chat',
@@ -61,19 +91,33 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         child: MaxWidthBox(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                  0,
-                ),
-                child: AppTextField(
-                  controller: _searchController,
-                  label: 'Search conversations',
-                  suffixIcon: const Icon(Icons.search),
-                  onChanged: (value) => setState(() => _query = value),
-                ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                child: _searchVisible
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.md,
+                          AppSpacing.sm,
+                          AppSpacing.md,
+                          AppSpacing.sm,
+                        ),
+                        child: GlassCard(
+                          padding: EdgeInsets.zero,
+                          borderRadius: AppRadius.mdRadius,
+                          child: AppTextField(
+                            controller: _searchController,
+                            label: 'Search conversations',
+                            suffixIcon: const Icon(Icons.search),
+                            autofocus: true,
+                            filled: false,
+                            onChanged: (value) =>
+                                setState(() => _query = value),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(width: double.infinity),
               ),
               Expanded(
                 child: conversationsAsync.when(
@@ -115,7 +159,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                               ],
                             )
                           : ListView.separated(
-                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.sm,
+                              ),
                               itemCount: filtered.length,
                               separatorBuilder: (context, index) =>
                                   const SizedBox(height: AppSpacing.sm),
@@ -151,7 +198,8 @@ class _ConversationCard extends StatelessWidget {
     final friend = conversation.friend;
     final hasUnread = conversation.unreadCount > 0;
 
-    return Card(
+    return GlassCard(
+      padding: EdgeInsets.zero,
       child: AppListTile(
         onTap: () => context.push(RouteNames.chat, extra: friend),
         leading: UserAvatar(
