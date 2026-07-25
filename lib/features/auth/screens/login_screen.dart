@@ -100,6 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               label: 'Log In',
               isLoading: _isLoading,
               onPressed: _submit,
+              variant: AppButtonVariant.gradient,
             ),
             const SizedBox(height: AppSpacing.lg),
             Row(

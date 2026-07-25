@@ -5,12 +5,14 @@ import '../../../core/network/app_exception.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/small_spinner.dart';
+import '../../../core/widgets/staggered_entrance.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/friend_request.dart';
 import '../../../providers/friend_requests_provider.dart';
@@ -67,17 +69,20 @@ class FriendRequestsScreen extends ConsumerWidget {
                         message: 'No one has requested to add you.',
                       )
                     else
-                      for (final request in data.incoming)
-                        _IncomingRequestCard(
-                          request: request,
-                          isPending: data.pendingIds.contains(request.id),
-                          onAccept: () => _handle(
-                            context,
-                            () => notifier.accept(request.id),
-                          ),
-                          onReject: () => _handle(
-                            context,
-                            () => notifier.reject(request.id),
+                      for (final (index, request) in data.incoming.indexed)
+                        StaggeredEntrance(
+                          index: index,
+                          child: _IncomingRequestCard(
+                            request: request,
+                            isPending: data.pendingIds.contains(request.id),
+                            onAccept: () => _handle(
+                              context,
+                              () => notifier.accept(request.id),
+                            ),
+                            onReject: () => _handle(
+                              context,
+                              () => notifier.reject(request.id),
+                            ),
                           ),
                         ),
                     const SizedBox(height: AppSpacing.xl),
@@ -91,13 +96,16 @@ class FriendRequestsScreen extends ConsumerWidget {
                         message: "You haven't sent any requests.",
                       )
                     else
-                      for (final request in data.outgoing)
-                        _OutgoingRequestCard(
-                          request: request,
-                          isPending: data.pendingIds.contains(request.id),
-                          onCancel: () => _handle(
-                            context,
-                            () => notifier.cancel(request.id),
+                      for (final (index, request) in data.outgoing.indexed)
+                        StaggeredEntrance(
+                          index: data.incoming.length + index,
+                          child: _OutgoingRequestCard(
+                            request: request,
+                            isPending: data.pendingIds.contains(request.id),
+                            onCancel: () => _handle(
+                              context,
+                              () => notifier.cancel(request.id),
+                            ),
                           ),
                         ),
                   ],
@@ -183,37 +191,54 @@ class _IncomingRequestCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            UserAvatar(name: user.name, avatarUrl: user.avatarUrl, radius: 24),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(
-                user.name,
-                style: Theme.of(context).textTheme.titleMedium,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (isPending)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: SmallSpinner(),
-              )
-            else ...[
-              IconButton(
-                icon: Icon(
-                  Icons.check_circle_outline,
-                  color: colorScheme.primary,
+            Row(
+              children: [
+                UserAvatar(
+                  name: user.name,
+                  avatarUrl: user.avatarUrl,
+                  radius: 24,
                 ),
-                tooltip: 'Accept',
-                onPressed: onAccept,
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    user.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (isPending)
+              const Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  child: SmallSpinner(),
+                ),
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: onReject,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colorScheme.error,
+                        side: BorderSide(color: colorScheme.error),
+                      ),
+                      child: const Text('Reject'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: AppButton(label: 'Accept', onPressed: onAccept),
+                  ),
+                ],
               ),
-              IconButton(
-                icon: Icon(Icons.cancel_outlined, color: colorScheme.error),
-                tooltip: 'Reject',
-                onPressed: onReject,
-              ),
-            ],
           ],
         ),
       ),

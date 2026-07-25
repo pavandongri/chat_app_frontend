@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/app_exception.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_list_tile.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
@@ -13,6 +15,7 @@ import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/small_spinner.dart';
+import '../../../core/widgets/staggered_entrance.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../providers/search_friends_provider.dart';
 
@@ -107,9 +110,12 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                           const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final result = results[index];
-                        return _SearchResultCard(
-                          result: result,
-                          onSendRequest: () => _sendRequest(result.user.id),
+                        return StaggeredEntrance(
+                          index: index,
+                          child: _SearchResultCard(
+                            result: result,
+                            onSendRequest: () => _sendRequest(result.user.id),
+                          ),
                         );
                       },
                     );
@@ -135,36 +141,17 @@ class _SearchResultCard extends StatelessWidget {
     final user = result.user;
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
+      child: AppListTile(
+        leading: UserAvatar(
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+          radius: 24,
         ),
-        child: Row(
-          children: [
-            UserAvatar(name: user.name, avatarUrl: user.avatarUrl, radius: 24),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    user.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    '@${user.username}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _ActionButton(state: result.buttonState, onPressed: onSendRequest),
-          ],
+        title: Text(user.name),
+        subtitle: Text('@${user.username}'),
+        trailing: _ActionButton(
+          state: result.buttonState,
+          onPressed: onSendRequest,
         ),
       ),
     );
@@ -185,10 +172,7 @@ class _ActionButton extends StatelessWidget {
       case FriendRequestButtonState.sent:
         return const OutlinedButton(onPressed: null, child: Text('Requested'));
       case FriendRequestButtonState.none:
-        return FilledButton.tonal(
-          onPressed: onPressed,
-          child: const Text('Add'),
-        );
+        return AppButton(label: 'Add', onPressed: onPressed);
     }
   }
 }

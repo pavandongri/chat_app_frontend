@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/app_exception.dart';
-import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_bar.dart';
+import '../../../core/widgets/app_list_tile.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/max_width_box.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/staggered_entrance.dart';
+import '../../../core/widgets/unread_badge.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/conversation.dart';
 import '../../../models/message_status.dart';
@@ -50,6 +52,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
     return Scaffold(
       appBar: const CustomAppBar(title: 'Chats'),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push(RouteNames.friendsList),
+        tooltip: 'Start a new chat',
+        child: const Icon(Icons.chat),
+      ),
       body: SafeArea(
         child: MaxWidthBox(
           child: Column(
@@ -113,8 +120,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                               separatorBuilder: (context, index) =>
                                   const SizedBox(height: AppSpacing.sm),
                               itemBuilder: (context, index) =>
-                                  _ConversationCard(
-                                    conversation: filtered[index],
+                                  StaggeredEntrance(
+                                    index: index,
+                                    child: _ConversationCard(
+                                      conversation: filtered[index],
+                                    ),
                                   ),
                             ),
                     );
@@ -142,102 +152,51 @@ class _ConversationCard extends StatelessWidget {
     final hasUnread = conversation.unreadCount > 0;
 
     return Card(
-      child: InkWell(
-        borderRadius: AppRadius.lgRadius,
+      child: AppListTile(
         onTap: () => context.push(RouteNames.chat, extra: friend),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              UserAvatar(
-                name: friend.name,
-                avatarUrl: friend.avatarUrl,
-                radius: 26,
+        leading: UserAvatar(
+          name: friend.name,
+          avatarUrl: friend.avatarUrl,
+          radius: 26,
+        ),
+        title: Text(friend.name),
+        subtitle: Row(
+          children: [
+            if (conversation.lastMessageFromMe) ...[
+              Icon(
+                _statusIcon(conversation.status),
+                size: 16,
+                color: _statusColor(conversation.status, colorScheme),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      friend.name,
-                      style: textTheme.titleMedium,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        if (conversation.lastMessageFromMe) ...[
-                          Icon(
-                            _statusIcon(conversation.status),
-                            size: 16,
-                            color: _statusColor(
-                              conversation.status,
-                              colorScheme,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                        Expanded(
-                          child: Text(
-                            conversation.lastMessage,
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: hasUnread
-                                  ? colorScheme.onSurface
-                                  : colorScheme.onSurfaceVariant,
-                              fontWeight: hasUnread
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              const SizedBox(width: 4),
+            ],
+            Expanded(
+              child: Text(
+                conversation.lastMessage,
+                style: TextStyle(
+                  color: hasUnread ? colorScheme.onSurface : null,
+                  fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    _formatTimestamp(conversation.lastMessageAt),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: hasUnread
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
-                      fontWeight: hasUnread
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  if (hasUnread)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: AppRadius.fullRadius,
-                      ),
-                      child: Text(
-                        '${conversation.unreadCount}',
-                        style: textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                ],
+            ),
+          ],
+        ),
+        trailing: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              _formatTimestamp(conversation.lastMessageAt),
+              style: textTheme.bodySmall?.copyWith(
+                color: hasUnread
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+                fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 6),
+            UnreadBadge(count: conversation.unreadCount),
+          ],
         ),
       ),
     );

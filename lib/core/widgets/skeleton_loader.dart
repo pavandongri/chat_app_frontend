@@ -26,8 +26,13 @@ class _SkeletonBoxState extends State<SkeletonBox>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1100),
+    duration: const Duration(milliseconds: 1200),
   )..repeat(reverse: true);
+
+  late final Animation<double> _shimmer = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
 
   @override
   void dispose() {
@@ -40,7 +45,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
     final colorScheme = Theme.of(context).colorScheme;
 
     return AnimatedBuilder(
-      animation: _controller,
+      animation: _shimmer,
       builder: (context, _) {
         return Container(
           width: widget.width,
@@ -49,7 +54,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
             color: Color.lerp(
               colorScheme.surfaceContainerHigh,
               colorScheme.surfaceContainerHighest,
-              _controller.value,
+              _shimmer.value,
             ),
             borderRadius: widget.borderRadius,
           ),

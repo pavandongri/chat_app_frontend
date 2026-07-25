@@ -156,6 +156,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               label: 'Sign Up',
               isLoading: _isLoading,
               onPressed: _submit,
+              variant: AppButtonVariant.gradient,
             ),
             const SizedBox(height: AppSpacing.lg),
             Row(

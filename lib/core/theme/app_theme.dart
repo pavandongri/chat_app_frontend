@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 import 'app_radius.dart';
+import 'app_shadows.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
@@ -47,6 +48,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           padding: buttonPadding,
           shape: buttonShape,
+          elevation: AppShadows.elevationSm,
+          shadowColor: colorScheme.shadow,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -88,7 +91,8 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: colorScheme.surfaceContainerHigh,
-        elevation: 0,
+        elevation: AppShadows.elevationSm,
+        shadowColor: colorScheme.shadow,
         margin: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,
@@ -97,6 +101,8 @@ class AppTheme {
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: colorScheme.surfaceContainerHigh,
+        elevation: AppShadows.elevationLg,
+        shadowColor: colorScheme.shadow,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.lgRadius),
         titleTextStyle: textTheme.titleLarge,
         contentTextStyle: textTheme.bodyMedium,
@@ -104,6 +110,7 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: colorScheme.inverseSurface,
+        elevation: AppShadows.elevationMd,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
           color: colorScheme.onInverseSurface,
         ),

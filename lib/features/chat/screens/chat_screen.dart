@@ -235,6 +235,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       message:
           'This message will be permanently deleted. This cannot be undone.',
       confirmLabel: 'Delete',
+      isDestructive: true,
     );
     if (!confirmed) return;
 

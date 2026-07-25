@@ -96,14 +96,14 @@ Notes on ordering:
 
 ### Phase 2 (UI/UX Redesign)
 
-- [ ] 21 — Theme System v2 (WhatsApp Palette)
-- [ ] 22 — Premium Reusable Component Library
-- [ ] 23 — Home Shell: Bottom Navigation Redesign
-- [ ] 24 — Chats Tab Redesign
-- [ ] 25 — Friend Requests Tab Redesign
-- [ ] 26 — Friend Search Tab Redesign
-- [ ] 27 — Profile Tab Redesign
-- [ ] 28 — Authentication Screens Premium Redesign
-- [ ] 29 — Dialogs & Feedback Components Redesign
-- [ ] 30 — Micro-Interactions & Transition Polish
-- [ ] 31 — Phase 2 Consistency & QA Pass
+- [x] 21 — Theme System v2 (WhatsApp Palette)
+- [x] 22 — Premium Reusable Component Library
+- [x] 23 — Home Shell: Bottom Navigation Redesign
+- [x] 24 — Chats Tab Redesign
+- [x] 25 — Friend Requests Tab Redesign
+- [x] 26 — Friend Search Tab Redesign
+- [x] 27 — Profile Tab Redesign
+- [x] 28 — Authentication Screens Premium Redesign
+- [x] 29 — Dialogs & Feedback Components Redesign
+- [x] 30 — Micro-Interactions & Transition Polish
+- [x] 31 — Phase 2 Consistency & QA Pass

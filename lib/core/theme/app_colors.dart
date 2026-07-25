@@ -6,13 +6,25 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color seedLight = Color(0xFF3F51B5);
-  static const Color seedDark = Color(0xFF7986CB);
+  /// WhatsApp-inspired brand palette. `seedLight`/`seedDark` drive the
+  /// Material 3 tonal palettes via `ColorScheme.fromSeed`. `tealDeep` and
+  /// `accentGreen` are the two fixed brand anchors (not theme-derived
+  /// tones) that `AppGradients` composes into brand gradients.
+  static const Color seedLight = Color(0xFF128C7E); // WhatsApp teal
+  static const Color seedDark = Color(0xFF25D366); // WhatsApp light green
+  static const Color tealDeep = Color(0xFF075E54); // WhatsApp deep teal
+  static const Color accentGreen = Color(0xFF25D366); // WhatsApp light green
 
   /// Presence dot colors (Story 9/15) — semantic, not part of the Material
   /// color scheme, so kept here rather than derived from `ColorScheme`.
-  static const Color onlineIndicator = Color(0xFF4CAF50);
+  static const Color onlineIndicator = accentGreen;
   static const Color offlineIndicator = Color(0xFF9E9E9E);
+
+  /// Text/icon color for content painted directly on top of
+  /// `AppGradients.primary` (e.g. the gradient `AppButton` variant) — fixed
+  /// regardless of theme brightness because the gradient itself doesn't
+  /// change with the theme.
+  static const Color onGradient = Colors.white;
 
   static ColorScheme get lightScheme =>
       ColorScheme.fromSeed(seedColor: seedLight, brightness: Brightness.light);

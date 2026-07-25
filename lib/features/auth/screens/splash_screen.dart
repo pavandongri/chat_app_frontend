@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_gradients.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../models/user.dart';
 import '../../../providers/auth_provider.dart';
@@ -14,11 +17,33 @@ class SplashScreen extends ConsumerStatefulWidget {
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 500),
+  )..forward();
+
+  late final Animation<double> _fade = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOut,
+  );
+
+  late final Animation<double> _scale = Tween(
+    begin: 0.92,
+    end: 1.0,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
   @override
   void initState() {
     super.initState();
     _bootstrap();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _bootstrap() async {
@@ -37,20 +62,42 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.chat_bubble_rounded,
-              size: 72,
-              color: colorScheme.primary,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: AppGradients.background(colorScheme),
+        ),
+        child: Center(
+          child: FadeTransition(
+            opacity: _fade,
+            child: ScaleTransition(
+              scale: _scale,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: AppShadows.softLarge(colorScheme),
+                    ),
+                    child: const Icon(
+                      Icons.chat_bubble_rounded,
+                      size: 56,
+                      color: AppColors.onGradient,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Chat App',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  const CircularProgressIndicator(),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text('Chat App', style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: AppSpacing.xl),
-            const CircularProgressIndicator(),
-          ],
+          ),
         ),
       ),
     );
