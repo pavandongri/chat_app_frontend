@@ -4,6 +4,7 @@ import '../core/network/app_exception.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/response_parser.dart';
 import '../core/utils/app_logger.dart';
+import '../models/conversation.dart';
 import '../models/message.dart';
 
 const _unexpectedErrorMessage = 'Something went wrong. Please try again.';
@@ -55,6 +56,19 @@ class MessageRepository {
         limit: data['limit'] as int,
         total: data['total'] as int,
       );
+    } on DioException catch (e) {
+      throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('MessageRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
+    }
+  }
+
+  Future<List<ConversationSummary>> getConversationSummaries() async {
+    try {
+      final response = await _dioClient.dio.get('/messages');
+      final data = ResponseParser.list(response);
+      return data.map(ConversationSummary.fromJson).toList();
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     } catch (e, st) {

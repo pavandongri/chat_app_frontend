@@ -60,6 +60,18 @@ Notes on ordering:
   though the default is to work top to bottom.
 - 30 and 31 must come last — they polish and audit everything above them.
 
+## Implementation Plan — Phase 3 (Chat List Real Data)
+
+Phase 1 and 2 are complete. Phase 3 replaces the Chat List's mocked
+previews with real backend data now that the backend exposes a
+conversations-list endpoint — see
+`../backend/ai/completed/017-conversations-unread-count.md`. This does not
+change any domain rule or anything under "What NOT to Build."
+
+| #  | Story                                    | File                                                                 | Depends On |
+| -- | ------------------------------------------ | ----------------------------------------------------------------------- | ---------- |
+| 32 | Chat List Real Data & Larger Message Pages | [032-chat-list-real-data.md](stories/032-chat-list-real-data.md)         | 12, 24     |
+
 ## Workflow
 
 1. Pick the next unstarted story (top to bottom, respecting dependencies).
@@ -107,3 +119,7 @@ Notes on ordering:
 - [x] 29 — Dialogs & Feedback Components Redesign
 - [x] 30 — Micro-Interactions & Transition Polish
 - [x] 31 — Phase 2 Consistency & QA Pass
+
+### Phase 3 (Chat List Real Data)
+
+- [x] 32 — Chat List Real Data & Larger Message Pages

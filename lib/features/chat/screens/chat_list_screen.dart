@@ -18,6 +18,7 @@ import '../../../core/widgets/unread_badge.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/conversation.dart';
 import '../../../models/message_status.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/chat_provider.dart';
 import '../../../routes/route_names.dart';
 
@@ -61,6 +62,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     final conversationsAsync = ref.watch(chatListControllerProvider);
+    final myId = ref.watch(authControllerProvider).valueOrNull?.id;
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -171,6 +173,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     index: index,
                                     child: _ConversationCard(
                                       conversation: filtered[index],
+                                      lastMessageFromMe:
+                                          filtered[index].lastMessage
+                                              .senderId ==
+                                          myId,
                                     ),
                                   ),
                             ),
@@ -187,15 +193,20 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 }
 
 class _ConversationCard extends StatelessWidget {
-  const _ConversationCard({required this.conversation});
+  const _ConversationCard({
+    required this.conversation,
+    required this.lastMessageFromMe,
+  });
 
   final Conversation conversation;
+  final bool lastMessageFromMe;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final friend = conversation.friend;
+    final status = conversation.lastMessage.status;
     final hasUnread = conversation.unreadCount > 0;
 
     return GlassCard(
@@ -210,17 +221,17 @@ class _ConversationCard extends StatelessWidget {
         title: Text(friend.name),
         subtitle: Row(
           children: [
-            if (conversation.lastMessageFromMe) ...[
+            if (lastMessageFromMe) ...[
               Icon(
-                _statusIcon(conversation.status),
+                _statusIcon(status),
                 size: 16,
-                color: _statusColor(conversation.status, colorScheme),
+                color: _statusColor(status, colorScheme),
               ),
               const SizedBox(width: 4),
             ],
             Expanded(
               child: Text(
-                conversation.lastMessage,
+                conversation.lastMessage.message,
                 style: TextStyle(
                   color: hasUnread ? colorScheme.onSurface : null,
                   fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
@@ -234,7 +245,7 @@ class _ConversationCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              _formatTimestamp(conversation.lastMessageAt),
+              _formatTimestamp(conversation.lastMessage.createdAt),
               style: textTheme.bodySmall?.copyWith(
                 color: hasUnread
                     ? colorScheme.primary

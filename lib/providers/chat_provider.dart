@@ -8,7 +8,10 @@ import 'core_providers.dart';
 import 'friends_provider.dart';
 
 final chatRepositoryProvider = Provider<ChatRepository>(
-  (ref) => ChatRepository(ref.watch(friendsRepositoryProvider)),
+  (ref) => ChatRepository(
+    ref.watch(friendsRepositoryProvider),
+    ref.watch(messageRepositoryProvider),
+  ),
 );
 
 class ChatListController extends AutoDisposeAsyncNotifier<List<Conversation>> {
@@ -36,7 +39,7 @@ final messageRepositoryProvider = Provider<MessageRepository>(
   (ref) => MessageRepository(ref.watch(dioClientProvider)),
 );
 
-const _pageSize = 20;
+const _pageSize = 50;
 
 class ChatState {
   const ChatState({
