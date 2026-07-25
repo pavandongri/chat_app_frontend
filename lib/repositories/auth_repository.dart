@@ -1,8 +1,12 @@
 import 'package:dio/dio.dart';
 
+import '../core/network/app_exception.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/response_parser.dart';
+import '../core/utils/app_logger.dart';
 import '../models/user.dart';
+
+const _unexpectedErrorMessage = 'Something went wrong. Please try again.';
 
 /// The only layer allowed to call Dio for auth. `AuthController` orchestrates
 /// these calls and owns session state; this class just talks to the API.
@@ -32,6 +36,9 @@ class AuthRepository {
       return User.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -43,6 +50,9 @@ class AuthRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -51,6 +61,9 @@ class AuthRepository {
       await _dioClient.dio.post('/auth/resend-otp', data: {'email': email});
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -70,6 +83,9 @@ class AuthRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -81,6 +97,9 @@ class AuthRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -95,6 +114,9 @@ class AuthRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -110,6 +132,9 @@ class AuthRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -118,6 +143,9 @@ class AuthRepository {
       await _dioClient.dio.post('/auth/logout');
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('AuthRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 }

@@ -2,9 +2,13 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../core/network/app_exception.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/response_parser.dart';
+import '../core/utils/app_logger.dart';
 import '../models/user.dart';
+
+const _unexpectedErrorMessage = 'Something went wrong. Please try again.';
 
 /// The only layer allowed to call Dio for `/profile`.
 class ProfileRepository {
@@ -18,6 +22,9 @@ class ProfileRepository {
       return User.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('ProfileRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -34,6 +41,9 @@ class ProfileRepository {
       return User.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('ProfileRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -52,6 +62,9 @@ class ProfileRepository {
       return User.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('ProfileRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 }

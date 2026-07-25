@@ -1,8 +1,12 @@
 import 'package:dio/dio.dart';
 
+import '../core/network/app_exception.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/response_parser.dart';
+import '../core/utils/app_logger.dart';
 import '../models/message.dart';
+
+const _unexpectedErrorMessage = 'Something went wrong. Please try again.';
 
 class ConversationPage {
   const ConversationPage({
@@ -53,6 +57,9 @@ class MessageRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('MessageRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -68,6 +75,9 @@ class MessageRepository {
       return Message.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('MessageRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -80,6 +90,9 @@ class MessageRepository {
       return Message.fromJson(ResponseParser.data(response)!);
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('MessageRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -88,6 +101,9 @@ class MessageRepository {
       await _dioClient.dio.delete('/messages/$messageId');
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('MessageRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 }

@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/utils/app_logger.dart';
 import 'providers/core_providers.dart';
 import 'providers/theme_provider.dart';
 import 'routes/app_router.dart';
@@ -11,6 +13,19 @@ import 'routes/app_router.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  FlutterError.onError = (details) {
+    AppLogger.logError('FlutterError', details.exception, details.stack);
+    if (kDebugMode) FlutterError.presentError(details);
+  };
+
+  // In release builds, a widget build failure must never surface its raw
+  // exception/stack trace — that's the same "stack trace on screen" bug as
+  // the network path, just from a different source. Debug builds keep
+  // Flutter's default red screen so the actual error stays visible.
+  if (kReleaseMode) {
+    ErrorWidget.builder = (details) => const _ProductionErrorScreen();
+  }
 
   // Edge-to-edge: without this, Android paints its own contrast scrim
   // behind the system navigation bar, which shows up as a hard-edged strip
@@ -60,6 +75,37 @@ class ChatApp extends ConsumerWidget {
           child: child!,
         );
       },
+    );
+  }
+}
+
+/// Last-resort replacement for Flutter's red error screen in release builds.
+/// May render above `MaterialApp`'s own `Theme`, so it brings its own
+/// `Material` ancestor and sticks to neutral colors instead of `Theme.of`.
+class _ProductionErrorScreen extends StatelessWidget {
+  const _ProductionErrorScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Material(
+      color: Color(0xFF1A1A1A),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 40, color: Colors.white70),
+              SizedBox(height: 12),
+              Text(
+                'Something went wrong.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

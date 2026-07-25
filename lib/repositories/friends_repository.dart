@@ -1,10 +1,14 @@
 import 'package:dio/dio.dart';
 
+import '../core/network/app_exception.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/response_parser.dart';
+import '../core/utils/app_logger.dart';
 import '../models/friend.dart';
 import '../models/friend_request.dart';
 import '../models/public_user.dart';
+
+const _unexpectedErrorMessage = 'Something went wrong. Please try again.';
 
 /// The only layer allowed to call Dio for `/users/search` and `/friends*`.
 class FriendsRepository {
@@ -22,6 +26,9 @@ class FriendsRepository {
       return data.map((json) => PublicUser.fromJson(json)).toList();
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -34,6 +41,9 @@ class FriendsRepository {
       return ResponseParser.data(response)!['id'] as String;
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -44,6 +54,9 @@ class FriendsRepository {
       return data.map((json) => Friend.fromJson(json)).toList();
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -62,6 +75,9 @@ class FriendsRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -73,6 +89,9 @@ class FriendsRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -84,6 +103,9 @@ class FriendsRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 
@@ -95,6 +117,9 @@ class FriendsRepository {
       );
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
     }
   }
 }
