@@ -8,6 +8,7 @@ class PublicUser {
     required this.username,
     required this.name,
     required this.avatarUrl,
+    this.friendRequestId,
   });
 
   final String id;
@@ -15,12 +16,18 @@ class PublicUser {
   final String name;
   final String? avatarUrl;
 
+  /// Id of the pending friend request the current user already sent this
+  /// user, if any — only set by `GET /users/search`. `null` means no
+  /// outgoing request exists yet.
+  final String? friendRequestId;
+
   factory PublicUser.fromJson(Map<String, dynamic> json) {
     return PublicUser(
       id: json['id'] as String,
       username: json['username'] as String,
       name: json['name'] as String,
       avatarUrl: json['avatarUrl'] as String?,
+      friendRequestId: json['friendRequestId'] as String?,
     );
   }
 }

@@ -25,12 +25,13 @@ class FriendsRepository {
     }
   }
 
-  Future<void> sendFriendRequest(String receiverId) async {
+  Future<String> sendFriendRequest(String receiverId) async {
     try {
-      await _dioClient.dio.post(
+      final response = await _dioClient.dio.post(
         '/friends/request',
         data: {'receiverId': receiverId},
       );
+      return ResponseParser.data(response)!['id'] as String;
     } on DioException catch (e) {
       throw ResponseParser.mapError(e);
     }

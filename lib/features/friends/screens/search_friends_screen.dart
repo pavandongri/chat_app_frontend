@@ -58,6 +58,17 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
     }
   }
 
+  Future<void> _cancelRequest(String userId) async {
+    try {
+      await ref
+          .read(searchFriendsControllerProvider.notifier)
+          .cancelRequest(userId);
+    } on AppException catch (e) {
+      if (!mounted) return;
+      AppSnackBar.showError(context, e.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final resultsAsync = ref.watch(searchFriendsControllerProvider);
@@ -98,15 +109,11 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                         .retry(),
                   ),
                   data: (results) {
-                    if (_searchController.text.trim().isEmpty) {
-                      return const EmptyStateWidget(
-                        message: 'Search for friends by name.',
-                        icon: Icons.person_search_outlined,
-                      );
-                    }
                     if (results.isEmpty) {
-                      return const EmptyStateWidget(
-                        message: 'No users found.',
+                      return EmptyStateWidget(
+                        message: _searchController.text.trim().isEmpty
+                            ? 'No suggested friends right now.'
+                            : 'No users found.',
                         icon: Icons.search_off,
                       );
                     }
@@ -127,6 +134,8 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
                           child: _SearchResultCard(
                             result: result,
                             onSendRequest: () => _sendRequest(result.user.id),
+                            onCancelRequest: () =>
+                                _cancelRequest(result.user.id),
                           ),
                         );
                       },
@@ -143,10 +152,15 @@ class _SearchFriendsScreenState extends ConsumerState<SearchFriendsScreen> {
 }
 
 class _SearchResultCard extends StatelessWidget {
-  const _SearchResultCard({required this.result, required this.onSendRequest});
+  const _SearchResultCard({
+    required this.result,
+    required this.onSendRequest,
+    required this.onCancelRequest,
+  });
 
   final SearchResult result;
   final VoidCallback onSendRequest;
+  final VoidCallback onCancelRequest;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +178,8 @@ class _SearchResultCard extends StatelessWidget {
         subtitle: Text('@${user.username}'),
         trailing: _ActionButton(
           state: result.buttonState,
-          onPressed: onSendRequest,
+          onSendRequest: onSendRequest,
+          onCancelRequest: onCancelRequest,
         ),
       ),
     );
@@ -172,20 +187,30 @@ class _SearchResultCard extends StatelessWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({required this.state, required this.onPressed});
+  const _ActionButton({
+    required this.state,
+    required this.onSendRequest,
+    required this.onCancelRequest,
+  });
 
   final FriendRequestButtonState state;
-  final VoidCallback onPressed;
+  final VoidCallback onSendRequest;
+  final VoidCallback onCancelRequest;
 
   @override
   Widget build(BuildContext context) {
     switch (state) {
       case FriendRequestButtonState.sending:
+      case FriendRequestButtonState.cancelling:
         return const SmallSpinner();
       case FriendRequestButtonState.sent:
-        return const OutlinedButton(onPressed: null, child: Text('Requested'));
+        return OutlinedButton.icon(
+          onPressed: onCancelRequest,
+          icon: const Icon(Icons.close, size: 16),
+          label: const Text('Cancel'),
+        );
       case FriendRequestButtonState.none:
-        return AppButton(label: 'Add', onPressed: onPressed);
+        return AppButton(label: 'Add', onPressed: onSendRequest);
     }
   }
 }
