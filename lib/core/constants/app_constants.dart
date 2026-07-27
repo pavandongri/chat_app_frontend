@@ -5,7 +5,10 @@ class ApiConstants {
   /// mounted under `/api`). Point this at your device/emulator-reachable
   /// host when testing on a real device (e.g. `10.0.2.2` for the Android
   /// emulator instead of `localhost`).
-  static const String baseUrl = 'https://dislocate-dried-spiffy.ngrok-free.dev/api';
+
+  // static const String baseUrl = 'https://dislocate-dried-spiffy.ngrok-free.dev/api';
+  static const String baseUrl = 'https://chat-app-backend-i1kt.onrender.com/api';
+
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 15);
 
