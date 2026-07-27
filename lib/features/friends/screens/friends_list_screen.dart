@@ -17,6 +17,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../../models/friend.dart';
 import '../../../providers/friends_list_provider.dart';
+import '../../../providers/realtime_provider.dart';
 import '../../../routes/route_names.dart';
 
 class FriendsListScreen extends ConsumerStatefulWidget {
@@ -135,13 +136,20 @@ class _FriendsListScreenState extends ConsumerState<FriendsListScreen> {
   }
 }
 
-class _FriendCard extends StatelessWidget {
+class _FriendCard extends ConsumerWidget {
   const _FriendCard({required this.friend});
 
   final Friend friend;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // A live `presence:update` (Story 33) overrides the fetched snapshot
+    // the instant one arrives; friends with no live event yet keep showing
+    // that snapshot (Story 15's fetch-based behavior, unchanged).
+    final presenceOverride = ref.watch(presenceOverridesProvider)[friend.id];
+    final isOnline = presenceOverride?.isOnline ?? friend.isOnline;
+    final lastSeen = presenceOverride?.lastSeen ?? friend.lastSeen;
+
     return GlassCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -159,7 +167,7 @@ class _FriendCard extends StatelessWidget {
               Positioned(
                 right: 0,
                 bottom: 0,
-                child: PresenceDot(isOnline: friend.isOnline),
+                child: PresenceDot(isOnline: isOnline),
               ),
             ],
           ),
@@ -174,10 +182,7 @@ class _FriendCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
-                PresenceStatusText(
-                  isOnline: friend.isOnline,
-                  lastSeen: friend.lastSeen,
-                ),
+                PresenceStatusText(isOnline: isOnline, lastSeen: lastSeen),
               ],
             ),
           ),

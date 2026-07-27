@@ -72,6 +72,19 @@ change any domain rule or anything under "What NOT to Build."
 | -- | ------------------------------------------ | ----------------------------------------------------------------------- | ---------- |
 | 32 | Chat List Real Data & Larger Message Pages | [032-chat-list-real-data.md](stories/032-chat-list-real-data.md)         | 12, 24     |
 
+## Implementation Plan — Phase 4 (Real-Time)
+
+Phases 1–3 are complete. Phase 4 adds a WebSocket layer on top of the
+backend's own Phase 2 (`../backend/ai/completed/018-realtime-websockets.md`)
+for live messages, presence, and typing — see
+[project-context.md](project-context.md) for how this changes (and
+doesn't change) the domain rules. Strictly additive: every screen keeps
+its existing manual-refresh affordance as a fallback.
+
+| #  | Story                            | File                                                                   | Depends On |
+| -- | ---------------------------------- | ------------------------------------------------------------------------- | ---------- |
+| 33 | Real-Time Transport (WebSockets)   | [033-realtime-websockets.md](completed/033-realtime-websockets.md)        | 11, 15, 32 |
+
 ## Workflow
 
 1. Pick the next unstarted story (top to bottom, respecting dependencies).
@@ -123,3 +136,7 @@ change any domain rule or anything under "What NOT to Build."
 ### Phase 3 (Chat List Real Data)
 
 - [x] 32 — Chat List Real Data & Larger Message Pages
+
+### Phase 4 (Real-Time)
+
+- [x] 33 — Real-Time Transport (WebSockets)

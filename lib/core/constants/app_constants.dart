@@ -8,6 +8,15 @@ class ApiConstants {
   static const String baseUrl = 'https://dislocate-dried-spiffy.ngrok-free.dev/api';
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 15);
+
+  /// The WebSocket endpoint (Story 33) — same host as [baseUrl] (so it
+  /// works through the same ngrok tunnel), minus the `/api` prefix, at
+  /// `/ws`, with `http(s)` swapped for `ws(s)`.
+  static String get wsUrl {
+    final apiUri = Uri.parse(baseUrl);
+    final wsScheme = apiUri.scheme == 'https' ? 'wss' : 'ws';
+    return apiUri.replace(scheme: wsScheme, path: '/ws').toString();
+  }
 }
 
 class StorageKeys {

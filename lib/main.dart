@@ -6,7 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/utils/app_logger.dart';
+import 'models/user.dart';
+import 'providers/auth_provider.dart';
 import 'providers/core_providers.dart';
+import 'providers/realtime_provider.dart';
 import 'providers/theme_provider.dart';
 import 'routes/app_router.dart';
 
@@ -50,6 +53,19 @@ class ChatApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
+
+    // One WebSocket connection for the whole app session (Story 33) — opened
+    // when a session appears, closed on logout. Not gated on any particular
+    // screen being open.
+    ref.listen<AsyncValue<User?>>(authControllerProvider, (previous, next) {
+      final isLoggedIn = next.valueOrNull != null;
+      final wasLoggedIn = previous?.valueOrNull != null;
+      if (isLoggedIn && !wasLoggedIn) {
+        ref.read(realtimeControllerProvider).connect();
+      } else if (!isLoggedIn && wasLoggedIn) {
+        ref.read(realtimeControllerProvider).disconnect();
+      }
+    });
 
     return MaterialApp.router(
       title: 'Chat App',

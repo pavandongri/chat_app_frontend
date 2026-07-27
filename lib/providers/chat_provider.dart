@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/conversation.dart';
 import '../models/message.dart';
+import '../models/message_status.dart';
 import '../repositories/chat_repository.dart';
 import '../repositories/message_repository.dart';
 import 'core_providers.dart';
@@ -52,6 +53,41 @@ class ChatListController extends AutoDisposeAsyncNotifier<List<Conversation>> {
       friend: updated[index].friend,
       lastMessage: lastMessage,
       unreadCount: 0,
+    );
+    updated.sort(
+      (a, b) => b.lastMessage.createdAt.compareTo(a.lastMessage.createdAt),
+    );
+    state = AsyncValue.data(updated);
+  }
+
+  /// Applies a message pushed live over the socket (Story 33): updates the
+  /// existing conversation's preview/unread count in place, or falls back
+  /// to a full [refresh] if there's no existing row to patch (e.g. a
+  /// friend's first-ever message).
+  Future<void> applyIncomingMessage(
+    Message message, {
+    required String currentUserId,
+  }) async {
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    final friendId = message.senderId == currentUserId
+        ? message.receiverId
+        : message.senderId;
+    final index = current.indexWhere((c) => c.friend.id == friendId);
+    if (index == -1) {
+      await refresh();
+      return;
+    }
+
+    final isIncoming = message.receiverId == currentUserId;
+    final updated = List<Conversation>.of(current);
+    updated[index] = Conversation(
+      friend: updated[index].friend,
+      lastMessage: message,
+      unreadCount: isIncoming
+          ? updated[index].unreadCount + 1
+          : updated[index].unreadCount,
     );
     updated.sort(
       (a, b) => b.lastMessage.createdAt.compareTo(a.lastMessage.createdAt),
@@ -267,6 +303,67 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
     state = AsyncValue.data(
       latest.copyWith(
         messages: latest.messages.where((m) => m.id != messageId).toList(),
+      ),
+    );
+  }
+
+  /// Appends a message pushed live over the socket (Story 33) — a no-op if
+  /// this conversation isn't loaded yet or already has it (e.g. this is
+  /// the sender's own tab/device echoing back).
+  void appendIncoming(Message message) {
+    final current = state.valueOrNull;
+    if (current == null) return;
+    if (current.messages.any((m) => m.id == message.id)) return;
+
+    state = AsyncValue.data(
+      current.copyWith(messages: [...current.messages, message]),
+    );
+  }
+
+  /// Patches an edit pushed live over the socket (Story 33) in place.
+  void applyEdited(Message message) {
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    state = AsyncValue.data(
+      current.copyWith(
+        messages: [
+          for (final m in current.messages)
+            if (m.id == message.id) message else m,
+        ],
+      ),
+    );
+  }
+
+  /// Removes a message deleted (by the other participant) live over the
+  /// socket (Story 33).
+  void applyDeleted(String messageId) {
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    state = AsyncValue.data(
+      current.copyWith(
+        messages: current.messages.where((m) => m.id != messageId).toList(),
+      ),
+    );
+  }
+
+  /// The friend this conversation is with just saw every message I sent
+  /// them (pushed live over the socket, Story 33) — flip those from sent
+  /// to seen locally instead of waiting for the next manual refresh.
+  void markSeenByFriend(String myUserId) {
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    state = AsyncValue.data(
+      current.copyWith(
+        messages: [
+          for (final m in current.messages)
+            if (m.senderId == myUserId && m.status != MessageStatus.seen)
+              m.copyWith(status: MessageStatus.seen)
+            else
+              m,
+        ],
       ),
     );
   }

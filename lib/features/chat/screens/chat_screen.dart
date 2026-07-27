@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import '../../../models/message.dart';
 import '../../../models/message_status.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/chat_provider.dart';
+import '../../../providers/realtime_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key, required this.friend});
@@ -41,18 +43,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _isRefreshing = false;
   bool _didInitialScroll = false;
 
+  Timer? _typingStopTimer;
+  bool _isTypingSent = false;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _messageController.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
+    _messageController.removeListener(_onTextChanged);
+    _typingStopTimer?.cancel();
+    if (_isTypingSent) _sendTyping(false);
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Sends `typing:start` on the first keystroke, then debounces
+  /// `typing:stop` to ~2s after the user pauses (or clears the field).
+  void _onTextChanged() {
+    final hasText = _messageController.text.trim().isNotEmpty;
+    if (!hasText) {
+      _typingStopTimer?.cancel();
+      if (_isTypingSent) _sendTyping(false);
+      return;
+    }
+
+    if (!_isTypingSent) _sendTyping(true);
+    _typingStopTimer?.cancel();
+    _typingStopTimer = Timer(
+      const Duration(seconds: 2),
+      () => _sendTyping(false),
+    );
+  }
+
+  void _sendTyping(bool isTyping) {
+    _isTypingSent = isTyping;
+    ref
+        .read(socketClientProvider)
+        .sendTyping(to: widget.friend.id, isTyping: isTyping);
   }
 
   void _onScroll() {
@@ -352,7 +386,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
-class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
+class _ChatAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const _ChatAppBar({
     required this.friend,
     required this.isRefreshing,
@@ -364,7 +398,15 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onRefresh;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // A live `presence:update` (Story 33) overrides the fetched snapshot
+    // the instant one arrives; friends with no live event yet keep showing
+    // that snapshot (Story 15's fetch-based behavior, unchanged).
+    final presenceOverride = ref.watch(presenceOverridesProvider)[friend.id];
+    final isOnline = presenceOverride?.isOnline ?? friend.isOnline;
+    final lastSeen = presenceOverride?.lastSeen ?? friend.lastSeen;
+    final isTyping = ref.watch(typingStatusProvider(friend.id));
+
     return AppBar(
       titleSpacing: 0,
       title: Row(
@@ -379,7 +421,7 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               Positioned(
                 right: 0,
                 bottom: 0,
-                child: PresenceDot(isOnline: friend.isOnline, size: 10),
+                child: PresenceDot(isOnline: isOnline, size: 10),
               ),
             ],
           ),
@@ -394,10 +436,16 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
-                PresenceStatusText(
-                  isOnline: friend.isOnline,
-                  lastSeen: friend.lastSeen,
-                ),
+                if (isTyping)
+                  Text(
+                    'typing…',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                else
+                  PresenceStatusText(isOnline: isOnline, lastSeen: lastSeen),
               ],
             ),
           ),

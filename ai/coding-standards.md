@@ -104,5 +104,10 @@ code in `lib/` over what's written here.
   function instead.
 - Don't add abstractions (generic base repository classes, plugin
   systems, config-driven anything) that no current story needs.
-- Manual refresh only: never add a `Timer.periodic`, socket, or
-  long-polling loop to simulate real-time updates — see Story 16.
+- Manual refresh only for anything Story 33 doesn't cover: never add a
+  `Timer.periodic` or long-polling loop to simulate real-time updates —
+  see Story 16. Story 33 (Phase 4) adds one deliberate, centrally-owned
+  WebSocket connection (`SocketClient`/`RealtimeController`) for live
+  messages/presence/typing — that exception is scoped to those two files
+  reacting to real server push events, not a license to add ad-hoc
+  sockets or polling elsewhere.
