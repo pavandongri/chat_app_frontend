@@ -1,14 +1,19 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/services/push_notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/app_logger.dart';
+import 'firebase_options.dart';
 import 'models/user.dart';
 import 'providers/auth_provider.dart';
 import 'providers/core_providers.dart';
+import 'providers/notification_provider.dart';
 import 'providers/realtime_provider.dart';
 import 'providers/theme_provider.dart';
 import 'routes/app_router.dart';
@@ -21,6 +26,16 @@ Future<void> main() async {
     AppLogger.logError('FlutterError', details.exception, details.stack);
     if (kDebugMode) FlutterError.presentError(details);
   };
+
+  // Push notifications (Story 34) stay disabled — local/in-app
+  // notifications still work — until `firebase_options.dart` has real
+  // project values; a missing/placeholder config must never crash startup.
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  } catch (e, st) {
+    AppLogger.logError('Firebase.initializeApp', e, st);
+  }
 
   // In release builds, a widget build failure must never surface its raw
   // exception/stack trace — that's the same "stack trace on screen" bug as
@@ -54,6 +69,11 @@ class ChatApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
 
+    // Notification handlers (local + FCM) are wired once per app session,
+    // independent of auth state — this only registers listeners, it doesn't
+    // request permission or hit the network (Story 34).
+    ref.read(notificationControllerProvider).initialize();
+
     // One WebSocket connection for the whole app session (Story 33) — opened
     // when a session appears, closed on logout. Not gated on any particular
     // screen being open.
@@ -62,13 +82,15 @@ class ChatApp extends ConsumerWidget {
       final wasLoggedIn = previous?.valueOrNull != null;
       if (isLoggedIn && !wasLoggedIn) {
         ref.read(realtimeControllerProvider).connect();
+        ref.read(notificationControllerProvider).registerForPush();
       } else if (!isLoggedIn && wasLoggedIn) {
         ref.read(realtimeControllerProvider).disconnect();
+        ref.read(notificationControllerProvider).unregisterForPush();
       }
     });
 
     return MaterialApp.router(
-      title: 'Chat App',
+      title: 'BuddyChat',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

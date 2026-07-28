@@ -70,7 +70,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       appBar: AppBar(
         titleSpacing: AppSpacing.lg,
         title: Text(
-          'Chat App',
+          'BuddyChat',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: colorScheme.primary,
             fontWeight: FontWeight.bold,

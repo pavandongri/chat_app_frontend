@@ -1,7 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Required on Android 13+ to show any notification, including the
+         local ones (Story 34) and FCM's system-tray notifications. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
-        android:label="chat_app"
+        android:label="BuddyChat"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

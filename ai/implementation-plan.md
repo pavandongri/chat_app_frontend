@@ -85,6 +85,19 @@ its existing manual-refresh affordance as a fallback.
 | -- | ---------------------------------- | ------------------------------------------------------------------------- | ---------- |
 | 33 | Real-Time Transport (WebSockets)   | [033-realtime-websockets.md](completed/033-realtime-websockets.md)        | 11, 15, 32 |
 
+## Implementation Plan — Phase 5 (Notifications)
+
+Phase 4 is complete. Phase 5 adds local (socket-driven) and FCM push
+notifications with sound and tap-to-open-chat navigation, backed by the
+backend's own Phase 3
+(`../backend/ai/completed/019-push-notifications.md`) — see
+[project-context.md](project-context.md) for how this changes (and doesn't
+change) the domain rules.
+
+| #  | Story                             | File                                                                 | Depends On |
+| -- | ------------------------------------ | ------------------------------------------------------------------------- | ---------- |
+| 34 | Notifications (Local + FCM Push)   | [034-notifications.md](completed/034-notifications.md)                    | 11, 33     |
+
 ## Workflow
 
 1. Pick the next unstarted story (top to bottom, respecting dependencies).
@@ -140,3 +153,7 @@ its existing manual-refresh affordance as a fallback.
 ### Phase 4 (Real-Time)
 
 - [x] 33 — Real-Time Transport (WebSockets)
+
+### Phase 5 (Notifications)
+
+- [x] 34 — Notifications (Local + FCM Push)

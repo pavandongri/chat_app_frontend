@@ -19,6 +19,7 @@ import '../features/profile/screens/profile_screen.dart';
 import '../models/friend.dart';
 import '../models/user.dart';
 import '../providers/auth_provider.dart';
+import 'navigator_key.dart';
 import 'route_names.dart';
 
 const _authRoutes = {
@@ -60,6 +61,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authSession = ref.watch(authControllerProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: RouteNames.splash,
     redirect: (context, state) {
       // Still restoring the session from secure storage — let Splash own

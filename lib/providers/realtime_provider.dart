@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/socket_client.dart';
+import '../core/utils/app_logger.dart';
 import '../models/message.dart';
 import 'auth_provider.dart';
 import 'chat_provider.dart';
 import 'core_providers.dart';
+import 'friends_list_provider.dart';
+import 'friends_provider.dart';
+import 'notification_provider.dart';
 
 final socketClientProvider = Provider<SocketClient>(
   (ref) => SocketClient(ref.watch(secureStorageServiceProvider)),
@@ -94,12 +98,56 @@ class RealtimeController {
         : message.senderId;
 
     final chatProvider = chatControllerProvider(otherId);
-    if (_ref.exists(chatProvider)) {
+    final chatIsOpen = _ref.exists(chatProvider);
+    if (chatIsOpen) {
       _ref.read(chatProvider.notifier).appendIncoming(message);
     }
     _ref
         .read(chatListControllerProvider.notifier)
         .applyIncomingMessage(message, currentUserId: myId);
+
+    // Incoming (not my own echo) and that conversation isn't the one on
+    // screen right now — the "local" in-app notification path (Story 34),
+    // FCM push covers the case where this socket isn't even open.
+    if (message.receiverId == myId && !chatIsOpen) {
+      _notifyLocalMessage(otherId, message.message);
+    }
+  }
+
+  /// Resolves `friendId`'s display name for the local notification. The
+  /// friends list cache is only populated once the Friends screen has been
+  /// visited this session, so this falls back to fetching that one friend
+  /// directly (same pattern `NotificationController._openChat` uses) rather
+  /// than silently showing a generic "New message" title.
+  Future<void> _notifyLocalMessage(String friendId, String messageText) async {
+    final friends = _ref.read(friendsListControllerProvider).valueOrNull;
+    String? friendName;
+    for (final friend in friends ?? const []) {
+      if (friend.id == friendId) {
+        friendName = friend.name;
+        break;
+      }
+    }
+
+    if (friendName == null) {
+      try {
+        final friend = await _ref
+            .read(friendsRepositoryProvider)
+            .getFriend(friendId);
+        friendName = friend.name;
+      } catch (e, st) {
+        AppLogger.logError('RealtimeController', e, st);
+        friendName = 'New message';
+      }
+    }
+
+    _ref
+        .read(notificationControllerProvider)
+        .notifyLocalMessage(
+          friendId: friendId,
+          friendName: friendName,
+          messageText: messageText,
+        );
   }
 
   void _onMessageEdited(Message message) {

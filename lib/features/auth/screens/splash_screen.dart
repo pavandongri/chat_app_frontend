@@ -76,7 +76,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   const BrandBadge(),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Chat App',
+                    'BuddyChat',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: AppSpacing.xl),

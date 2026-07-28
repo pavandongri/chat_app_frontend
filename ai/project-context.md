@@ -30,6 +30,14 @@ backend data. Phase 4 (Story 33) adds a WebSocket layer — see
 inline) — every other domain rule, and every screen's existing manual
 refresh affordance, is unchanged and stays as a fallback.
 
+Phase 5 (Story 34) adds local (socket-driven) and FCM push notifications
+with sound and tap-to-open-chat navigation — see
+[completed/034-notifications.md](completed/034-notifications.md), talking
+to the backend's own Phase 3
+(`../backend/ai/completed/019-push-notifications.md`). Strictly additive;
+supersedes only the "What NOT to Build" push-notifications line, marked
+inline below.
+
 ## Tech Stack
 
 - Flutter, Material 3
@@ -93,7 +101,8 @@ These mirror the backend's domain rules — the UI must not contradict them:
   Phase 4 (Story 33); everything else in this list still holds
 - Group chats
 - Media/file messages (text only)
-- Push notifications
+- Push notifications — superseded by Phase 5 (Story 34); everything else in
+  this list still holds
 - Message edit history or delete/undo history
 - Offline-first sync / local database caching beyond simple in-memory state
 - Any platform target beyond Android + iOS (no web/desktop build targets)

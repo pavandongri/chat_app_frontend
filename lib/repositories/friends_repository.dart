@@ -60,6 +60,21 @@ class FriendsRepository {
     }
   }
 
+  /// Resolves a bare friend id (e.g. a notification's `senderId`) into the
+  /// `Friend` object the Chat Screen route needs.
+  Future<Friend> getFriend(String friendId) async {
+    try {
+      final response = await _dioClient.dio.get('/friends/$friendId');
+      final data = ResponseParser.data(response)!;
+      return Friend.fromJson(data);
+    } on DioException catch (e) {
+      throw ResponseParser.mapError(e);
+    } catch (e, st) {
+      AppLogger.logError('FriendsRepository', e, st);
+      throw const AppException(statusCode: 0, message: _unexpectedErrorMessage);
+    }
+  }
+
   Future<({List<FriendRequest> incoming, List<FriendRequest> outgoing})>
   getFriendRequests() async {
     try {
